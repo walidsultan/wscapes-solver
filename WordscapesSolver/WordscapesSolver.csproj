@@ -79,6 +79,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppStore.cs" />
     <Compile Include="DataTypes\Character.cs" />
     <Compile Include="DataTypes\BitmapWithYOffset.cs" />
     <Compile Include="DataTypes\GameState.cs" />

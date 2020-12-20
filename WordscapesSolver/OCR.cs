@@ -79,26 +79,26 @@ namespace WS.Wscapes
             //int controlOffsetLeft = 227;
             //int controlOffsetTop = 1400;
             //int controlOffsetWidth = 644;
-            //int controlOffsetHeight = 740;
+            //int controlOffsetHeight = 840;
 
             //Pixel XL
             int controlOffsetLeft = 227;
             int controlOffsetTop = 1400;
-            int controlOffsetWidth = 1044;
+            int controlOffsetWidth = 954;
             int controlOffsetHeight = 1040;
 
             screenshot_segmented = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
             screenshot_segmented.Save($"App_Data\\current_cropped_controls.png");
 
-
             var inverted_controls = (Bitmap)screenshot_segmented.Clone();
             Invert(inverted_controls);
             inverted_controls.Save($"App_Data\\current_cropped_controls_inverted.png");
 
+
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(inverted_controls);
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x=>x.Area>500);
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area<13500);
             if (blobs.Count() == 0) return null;
 
             //Cut the Characters
@@ -130,12 +130,12 @@ namespace WS.Wscapes
                     left += img.Width;
                 }
             }
-             stackedImage.Save($"App_Data\\stacked_cropped_controls.png");
+            stackedImage.Save($"App_Data\\stacked_cropped_controls.png");
 
 
             using (var ocrPage = _ocrEngine.Process(stackedImage, PageSegMode.SingleWord))
             {
-                char[] chars = ocrPage.GetText().Trim().Replace(" ","").ToUpper().ToCharArray();
+                char[] chars = ocrPage.GetText().Trim().Replace(" ", "").ToUpper().ToCharArray();
 
                 if (chars.Count() != blobs.Count()) return null;
 
@@ -160,23 +160,23 @@ namespace WS.Wscapes
             return new Rectangle(rectangle.X - padding, rectangle.Y - padding, rectangle.Width + 2 * padding, rectangle.Height + 2 * padding);
         }
 
-        public Bitmap Binarize(Bitmap image, bool invert = true)
+        public Bitmap Binarize(Bitmap image, bool invert = true,int lowThreshold=0)
         {
             Bitmap sharpenImage = new Bitmap(image.Width, image.Height);
 
             int w = image.Width;
             int h = image.Height;
 
-            int threshold = 255;
-            //int threshold = 254;
+            int highThreshold = 255;
 
             for (int x = 0; x < w; x++)
             {
                 for (int y = 0; y < h; y++)
                 {
 
-                    if ((image.GetPixel(x, y).R >= threshold && image.GetPixel(x, y).G >= threshold && image.GetPixel(x, y).B >= threshold) ||
-                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0))
+                    if ((image.GetPixel(x, y).R >= highThreshold && image.GetPixel(x, y).G >= highThreshold && image.GetPixel(x, y).B >= highThreshold) ||
+                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0) ||
+                        (image.GetPixel(x, y).R == 96 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 46))
                     {
                         sharpenImage.SetPixel(x, y, invert ? Color.Black : Color.White);
                     }
@@ -190,7 +190,7 @@ namespace WS.Wscapes
             return sharpenImage;
         }
 
-        public Rect? GetWordCoordinates(string word, Bitmap image, int? YOffset = null)
+        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null)
         {
             if (YOffset.HasValue)
             {
@@ -217,14 +217,20 @@ namespace WS.Wscapes
                                     //}
 
                                     string ocrWord = iter.GetText(PageIteratorLevel.Word);
-                                    if (ocrWord != null && ocrWord.Contains(word))
+
+                                    if (ocrWord != null)
                                     {
-                                        iter.TryGetBoundingBox(PageIteratorLevel.Word, out Rect wordPosition);
-                                        if (YOffset.HasValue)
+                                        string matchingWord = words.FirstOrDefault(x => ocrWord.Contains(x));
+
+                                        if (matchingWord != null)
                                         {
-                                            wordPosition = new Rect(wordPosition.X1, wordPosition.Y1 + YOffset.Value, wordPosition.Width, wordPosition.Height);
+                                            iter.TryGetBoundingBox(PageIteratorLevel.Word, out Rect wordPosition);
+                                            if (YOffset.HasValue)
+                                            {
+                                                wordPosition = new Rect(wordPosition.X1, wordPosition.Y1 + YOffset.Value, wordPosition.Width, wordPosition.Height);
+                                            }
+                                            return new KeyValuePair<string, Rect>(matchingWord, wordPosition);
                                         }
-                                        return wordPosition;
                                     }
                                     //stringWriter.Write(" ");
 

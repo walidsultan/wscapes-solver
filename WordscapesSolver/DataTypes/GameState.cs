@@ -8,9 +8,11 @@ namespace WS.Wscapes.DataTypes
 {
     public enum GameState
     {
+        Initializing,
         Menu,
         Puzzle,
         LevelSolved,
-        PiggyBank
+        PiggyBank,
+        Transitioning
     }
 }

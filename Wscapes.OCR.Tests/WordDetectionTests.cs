@@ -3,6 +3,7 @@ using System.Drawing;
 using WS.Wscapes;
 using System.Linq;
 using System.IO;
+using System.Collections.Generic;
 
 namespace WordscapesSolver.OCR.Tests
 {
@@ -17,16 +18,11 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var rect = _sut.GetWordCoordinates("LEVEL", image,600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image,600);
 
             //Verify
-            Assert.IsNull(rect);
-
-            //Execute
-            rect = _sut.GetWordCoordinates("COLLECT", image);
-
-            //Verify
-            Assert.IsNotNull(rect);
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("COLLECT", matchingWord.Value.Key);
         }
 
         [TestMethod]
@@ -37,10 +33,10 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var rect = _sut.GetWordCoordinates("LEVEL", image,600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image,600);
 
             //Verify
-            Assert.IsNotNull(rect);
+            Assert.IsNotNull(matchingWord);
         }
 
         [TestMethod]
@@ -51,10 +47,10 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var rect = _sut.GetWordCoordinates("PIGGY", image, 600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "PIGGY" }, image, 600);
 
             //Verify
-            Assert.IsNotNull(rect);
+            Assert.IsNotNull(matchingWord);
         }
     }
 }
