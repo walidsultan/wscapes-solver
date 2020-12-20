@@ -8,7 +8,7 @@ using WS.Wscapes.DataTypes;
 
 namespace WS.Wscapes
 {
-    public class AppStore
+    public class AppState
     {
         public static Bitmap OriginalScreenshot { get; set; }
         public static Bitmap BinarizedScreenshot { get; set; }
@@ -16,6 +16,8 @@ namespace WS.Wscapes
         public static GameState PreviousGameState { get; set; }
         public static Point ClickPosition { get; set; }
         public static IEnumerable<Character> LevelControls { get; set; }
+        public static bool IsFourWordsOnly { get; set; }
+        public static bool IsFreshScreenshot { get; set; } = false;
     }
 
 

@@ -62,6 +62,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="TestCases\IsFourWordsOnly_Before.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestCases\IsFourWordsOnly_Before_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestCases\NotFourWordsOnly_Before.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestCases\test.case.TEXTRUE.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

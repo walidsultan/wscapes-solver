@@ -87,10 +87,10 @@ namespace WS.Wscapes
             int controlOffsetWidth = 954;
             int controlOffsetHeight = 1040;
 
-            screenshot_segmented = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
-            screenshot_segmented.Save($"App_Data\\current_cropped_controls.png");
+            var controlsImage = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
+            controlsImage.Save($"App_Data\\current_cropped_controls.png");
 
-            var inverted_controls = (Bitmap)screenshot_segmented.Clone();
+            var inverted_controls = (Bitmap)controlsImage.Clone();
             Invert(inverted_controls);
             inverted_controls.Save($"App_Data\\current_cropped_controls_inverted.png");
 
@@ -98,7 +98,7 @@ namespace WS.Wscapes
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(inverted_controls);
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area<13500);
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 13500);
             if (blobs.Count() == 0) return null;
 
             //Cut the Characters
@@ -106,7 +106,7 @@ namespace WS.Wscapes
             List<Bitmap> charImages = new List<Bitmap>();
             foreach (var blob in blobs)
             {
-                charImages.Add(CropImage(screenshot_segmented, AddPadding(blob.Rectangle, cropPadding)));
+                charImages.Add(CropImage(controlsImage, AddPadding(blob.Rectangle, cropPadding)));
             }
 
             //stack the images
@@ -133,13 +133,15 @@ namespace WS.Wscapes
             stackedImage.Save($"App_Data\\stacked_cropped_controls.png");
 
 
+            List<Character> charsWithPosition = null;
             using (var ocrPage = _ocrEngine.Process(stackedImage, PageSegMode.SingleWord))
             {
                 char[] chars = ocrPage.GetText().Trim().Replace(" ", "").ToUpper().ToCharArray();
 
-                if (chars.Count() != blobs.Count()) return null;
+                if (chars.Count() != blobs.Count() || chars.Count() <= 4) return null;
 
-                List<Character> charsWithPosition = new List<Character>();
+
+                charsWithPosition = new List<Character>();
                 int blobIndex = 0;
                 foreach (var blob in blobs)
                 {
@@ -150,8 +152,10 @@ namespace WS.Wscapes
                     });
                     blobIndex++;
                 }
-                return charsWithPosition;
             }
+
+            AppState.IsFourWordsOnly = IsFourWordsOnly(screenshot_segmented);
+            return charsWithPosition;
 
         }
 
@@ -160,7 +164,7 @@ namespace WS.Wscapes
             return new Rectangle(rectangle.X - padding, rectangle.Y - padding, rectangle.Width + 2 * padding, rectangle.Height + 2 * padding);
         }
 
-        public Bitmap Binarize(Bitmap image, bool invert = true,int lowThreshold=0)
+        public Bitmap Binarize(Bitmap image, bool invert = true, int lowThreshold = 0)
         {
             Bitmap sharpenImage = new Bitmap(image.Width, image.Height);
 
@@ -189,6 +193,25 @@ namespace WS.Wscapes
 
             return sharpenImage;
         }
+
+
+        public bool IsFourWordsOnly(Bitmap image)
+        {
+            var squareWidth = 45;
+            var squareHeight = 54;
+            image.Save($"App_Data\\IsFourWordsOnly_Before.png");
+
+            var fourWordsOnly = CropImage(image, new Rectangle(200, image.Height - 114, squareWidth, squareHeight));
+
+            fourWordsOnly.Save($"App_Data\\IsFourWordsOnly_After.png");
+
+            BlobCounter blobCounter = new BlobCounter();
+            blobCounter.ProcessImage(fourWordsOnly);
+
+            return blobCounter.GetObjectsInformation().Count() > 1;
+
+        }
+
 
         public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null)
         {

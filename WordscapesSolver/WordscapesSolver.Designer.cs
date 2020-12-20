@@ -22,11 +22,13 @@
             this.txtDeviceId = new System.Windows.Forms.TextBox();
             this.lblGameStateTitle = new System.Windows.Forms.Label();
             this.lblGameStateValue = new System.Windows.Forms.Label();
+            this.lblIsFourWordsOnlyTItle = new System.Windows.Forms.Label();
+            this.lblIsFourWordsOnlyValue = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(191, 107);
+            this.btnStart.Location = new System.Drawing.Point(193, 132);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(114, 51);
             this.btnStart.TabIndex = 0;
@@ -68,11 +70,30 @@
             this.lblGameStateValue.Size = new System.Drawing.Size(0, 13);
             this.lblGameStateValue.TabIndex = 4;
             // 
+            // lblIsFourWordsOnlyTItle
+            // 
+            this.lblIsFourWordsOnlyTItle.AutoSize = true;
+            this.lblIsFourWordsOnlyTItle.Location = new System.Drawing.Point(127, 99);
+            this.lblIsFourWordsOnlyTItle.Name = "lblIsFourWordsOnlyTItle";
+            this.lblIsFourWordsOnlyTItle.Size = new System.Drawing.Size(89, 13);
+            this.lblIsFourWordsOnlyTItle.TabIndex = 5;
+            this.lblIsFourWordsOnlyTItle.Text = "Four Words Only:";
+            // 
+            // lblIsFourWordsOnlyValue
+            // 
+            this.lblIsFourWordsOnlyValue.AutoSize = true;
+            this.lblIsFourWordsOnlyValue.Location = new System.Drawing.Point(240, 99);
+            this.lblIsFourWordsOnlyValue.Name = "lblIsFourWordsOnlyValue";
+            this.lblIsFourWordsOnlyValue.Size = new System.Drawing.Size(0, 13);
+            this.lblIsFourWordsOnlyValue.TabIndex = 6;
+            // 
             // WordscapesSolver
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(497, 184);
+            this.ClientSize = new System.Drawing.Size(497, 211);
+            this.Controls.Add(this.lblIsFourWordsOnlyValue);
+            this.Controls.Add(this.lblIsFourWordsOnlyTItle);
             this.Controls.Add(this.lblGameStateValue);
             this.Controls.Add(this.lblGameStateTitle);
             this.Controls.Add(this.txtDeviceId);
@@ -94,6 +115,8 @@
         private System.Windows.Forms.TextBox txtDeviceId;
         private System.Windows.Forms.Label lblGameStateTitle;
         private System.Windows.Forms.Label lblGameStateValue;
+        private System.Windows.Forms.Label lblIsFourWordsOnlyTItle;
+        private System.Windows.Forms.Label lblIsFourWordsOnlyValue;
     }
 }
 

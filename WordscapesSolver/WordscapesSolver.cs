@@ -36,7 +36,8 @@ namespace WS.Wscapes
 
 
         private const int SCREENSHOT_TIMER_CONSTANT = 1000;
-        private const int STATE_TIMER_CONSTANT = 1000;
+        //private const int STATE_TIMER_CONSTANT = 1373;
+        private const int STATE_TIMER_CONSTANT = 100;
         private const int ACTION_TIMER_CONSTANT = 100;
         public WordscapesSolver()
         {
@@ -71,7 +72,7 @@ namespace WS.Wscapes
         {
             _actionTimer.Enabled = false;
 
-            switch (AppStore.CurrentGameState)
+            switch (AppState.CurrentGameState)
             {
                 case GameState.Menu:
                 case GameState.LevelSolved:
@@ -79,7 +80,7 @@ namespace WS.Wscapes
                     TapScreen();
                     break;
                 case GameState.Puzzle:
-                    await SolveLevel(AppStore.LevelControls);
+                    await SolveLevel(AppState.LevelControls);
                     break;
             }
             _actionTimer.Enabled = true;
@@ -88,9 +89,9 @@ namespace WS.Wscapes
 
         private void TapScreen()
         {
-            if (AppStore.CurrentGameState != GameState.Transitioning)
+            if (AppState.CurrentGameState != GameState.Transitioning)
             {
-                (new TouchAction(_driver)).Tap(AppStore.ClickPosition.X, AppStore.ClickPosition.Y).Perform();
+                (new TouchAction(_driver)).Tap(AppState.ClickPosition.X, AppState.ClickPosition.Y).Perform();
 
                 SetGameState(GameState.Transitioning);
             }
@@ -99,10 +100,12 @@ namespace WS.Wscapes
 
         private void SetGameState(GameState state)
         {
-            AppStore.PreviousGameState = AppStore.CurrentGameState;
-            AppStore.CurrentGameState = state;
+            AppState.PreviousGameState = AppState.CurrentGameState;
+            AppState.CurrentGameState = state;
 
             lblGameStateValue.Invoke(new MethodInvoker(delegate { lblGameStateValue.Text = state.ToString(); }));
+            lblIsFourWordsOnlyValue.Invoke(new MethodInvoker(delegate { lblIsFourWordsOnlyValue.Text = AppState.IsFourWordsOnly.ToString(); }));
+
         }
 
 
@@ -117,7 +120,7 @@ namespace WS.Wscapes
                 {
                     foreach (var word in solutionGroup)
                     {
-                        if (AppStore.CurrentGameState != GameState.Puzzle)
+                        if (word.Length == 3 && AppState.IsFourWordsOnly)
                         {
                             break;
                         }
@@ -148,6 +151,9 @@ namespace WS.Wscapes
                         touchAction.Release().Perform();
                     }
                 }
+
+                System.Threading.Thread.Sleep(3000);
+                SetGameState(GameState.Transitioning);
             }
         }
 
@@ -155,23 +161,23 @@ namespace WS.Wscapes
         {
             _stateTimer.Enabled = false;
 
-            if (AppStore.BinarizedScreenshot != null)
+            if (AppState.BinarizedScreenshot != null && AppState.IsFreshScreenshot)
             {
-                var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                //var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
                 //AppStore.BinarizedScreenshot.Save($"App_Data\\current_screen_binarized_state_thread{threadId}.png");
 
-                switch (AppStore.CurrentGameState)
+                switch (AppState.CurrentGameState)
                 {
                     case GameState.Initializing:
 
-                        SetGameState(AppStore.BinarizedScreenshot);
+                        SetGameState(AppState.BinarizedScreenshot);
 
 
-                        var wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppStore.BinarizedScreenshot);
+                        var wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.BinarizedScreenshot);
                         if (wordPosition != null)
                         {
                             //Click on that point to start the level
-                            AppStore.ClickPosition = new System.Drawing.Point()
+                            AppState.ClickPosition = new System.Drawing.Point()
                             {
                                 X = wordPosition.Value.Value.X1,
                                 Y = wordPosition.Value.Value.Y1
@@ -182,9 +188,10 @@ namespace WS.Wscapes
                         break;
                     case GameState.Transitioning:
                     case GameState.Puzzle:
-                        SetGameState(AppStore.BinarizedScreenshot);
+                        SetGameState(AppState.BinarizedScreenshot);
                         break;
                 }
+                AppState.IsFreshScreenshot = AppState.CurrentGameState == AppState.PreviousGameState;
             }
 
             _stateTimer.Enabled = true;
@@ -195,16 +202,21 @@ namespace WS.Wscapes
             //Pause timer
             _screenshotTimer.Enabled = false;
 
-            var currentScreenshot = _driver.GetScreenshot();
-            using (var screenshotMemStream = new MemoryStream(currentScreenshot.AsByteArray))
+            if (AppState.CurrentGameState != GameState.Puzzle)
             {
-                //var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-                AppStore.OriginalScreenshot = new Bitmap(screenshotMemStream);
-                //  AppStore.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot_thread{threadId}.png");
-                AppStore.BinarizedScreenshot = _ocr.Binarize(AppStore.OriginalScreenshot);
-                //    AppStore.BinarizedScreenshot.Save($"App_Data\\current_screen_binarized_screenshot_thread{threadId}.png");
-            }
+                var currentScreenshot = _driver.GetScreenshot();
+                using (var screenshotMemStream = new MemoryStream(currentScreenshot.AsByteArray))
+                {
+                    //var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                    AppState.OriginalScreenshot = new Bitmap(screenshotMemStream);
+                    //  AppStore.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot_thread{threadId}.png");
+                    AppState.BinarizedScreenshot = _ocr.Binarize(AppState.OriginalScreenshot);
+                    //    AppStore.BinarizedScreenshot.Save($"App_Data\\current_screen_binarized_screenshot_thread{threadId}.png");
 
+                    AppState.IsFreshScreenshot = true;
+                }
+
+            }
             _screenshotTimer.Enabled = true;
         }
 
@@ -212,43 +224,42 @@ namespace WS.Wscapes
         private void SetGameState(Bitmap binarizedImage)
         {
 
-            if (AppStore.CurrentGameState == GameState.Puzzle)
+
+            var continueWords = new List<string> { "LEVEL", "COLLECT", "PIGGY" };
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, binarizedImage, 1400);
+            if (matchingWord != null)
             {
-                var continueWords = new List<string> { "LEVEL", "COLLECT", "PIGGY" };
-                var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, binarizedImage, 1400);
-                if (matchingWord != null)
+                //Click on that point to start the level
+                AppState.ClickPosition = new System.Drawing.Point()
                 {
-                    //Click on that point to start the level
-                    AppStore.ClickPosition = new System.Drawing.Point()
-                    {
-                        X = matchingWord.Value.Value.X1,
-                        Y = matchingWord.Value.Value.Y1
-                    };
+                    X = matchingWord.Value.Value.X1 + matchingWord.Value.Value.Width / 2,
+                    Y = matchingWord.Value.Value.Y1 + matchingWord.Value.Value.Height / 2
+                };
 
-                    SetGameState(GameState.LevelSolved);
+                SetGameState(GameState.LevelSolved);
 
-                    return;
-                }
-
-                var foundPiggyBank = CheckForPiggyBank(binarizedImage);
-                if (foundPiggyBank) {
-                    return;
-                }
+                return;
             }
 
-
-            if (AppStore.CurrentGameState == GameState.Transitioning)
+            var foundPiggyBank = CheckForPiggyBank(binarizedImage);
+            if (foundPiggyBank)
             {
+                return;
+            }
+
+            if (AppState.CurrentGameState != GameState.Puzzle)
+            {
+
                 var charsWithPosition = _ocr.GetCharacterControls(binarizedImage);
                 if (charsWithPosition != null && charsWithPosition.Count() > 0)
                 {
-                    AppStore.LevelControls = charsWithPosition;
+                    AppState.LevelControls = charsWithPosition;
                     SetGameState(GameState.Puzzle);
                     return;
                 }
-
-                CheckForPiggyBank(binarizedImage);
             }
+
+            //CheckForPiggyBank(binarizedImage);
         }
 
         private bool CheckForPiggyBank(Bitmap binarizedImage)
@@ -259,7 +270,7 @@ namespace WS.Wscapes
                 var crossLocationOffsetY = 50;
                 var crossLocationOffsetX = 750;
 
-                AppStore.ClickPosition = new System.Drawing.Point()
+                AppState.ClickPosition = new System.Drawing.Point()
                 {
                     X = piggyPosition.Value.Value.X1 + crossLocationOffsetX,
                     Y = piggyPosition.Value.Value.Y1 - crossLocationOffsetY
@@ -287,7 +298,7 @@ namespace WS.Wscapes
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            AppStore.CurrentGameState = GameState.Initializing;
+            AppState.CurrentGameState = GameState.Initializing;
 
             var driverOptions = new AppiumOptions();
 
