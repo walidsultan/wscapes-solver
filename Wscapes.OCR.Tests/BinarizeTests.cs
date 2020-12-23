@@ -19,15 +19,15 @@ namespace WordscapesSolver.OCR.Tests
             //Execute
             var binarizedImage = _sut.Binarize(image);
             binarizedImage.Save(@"APP_DATA\test.case.TEXTRUE_Binarized.png");
-            var chars = _sut.GetCharacterControls(binarizedImage);
+            var levelControls = _sut.GetCharacterControls(binarizedImage);
 
             //Verify
-            Assert.AreEqual(7, chars.Count());
-            Assert.IsNotNull(chars.Count(x => x.Char.Equals('T')) == 2);
-            Assert.IsNotNull(chars.Count(x => x.Char.Equals('E')) == 2);
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('X')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('R')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('U')));
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('T')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('E')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('X')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('R')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
         }
 
         [TestMethod]

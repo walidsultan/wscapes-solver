@@ -15,7 +15,8 @@ namespace WS.Wscapes
         public static GameState CurrentGameState { get; set; }
         public static GameState PreviousGameState { get; set; }
         public static Point ClickPosition { get; set; }
-        public static IEnumerable<Character> LevelControls { get; set; }
+        public static IEnumerable<Character> CurrentLevelControls { get; set; }
+        public static IEnumerable<Character> PreviousLevelControls { get; set; }
         public static bool IsFourWordsOnly { get; set; }
         public static bool IsFreshScreenshot { get; set; } = false;
     }

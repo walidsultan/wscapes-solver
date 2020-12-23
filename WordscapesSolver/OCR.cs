@@ -73,7 +73,7 @@ namespace WS.Wscapes
         //}
 
 
-        public IEnumerable<Character> GetCharacterControls(Bitmap screenshot_segmented)
+        public LevelControls GetCharacterControls(Bitmap screenshot_segmented)
         {
             ////Emulator
             //int controlOffsetLeft = 227;
@@ -83,7 +83,7 @@ namespace WS.Wscapes
 
             //Pixel XL
             int controlOffsetLeft = 227;
-            int controlOffsetTop = 1400;
+            int controlOffsetTop = 1500;
             int controlOffsetWidth = 954;
             int controlOffsetHeight = 1040;
 
@@ -133,19 +133,23 @@ namespace WS.Wscapes
             stackedImage.Save($"App_Data\\stacked_cropped_controls.png");
 
 
-            List<Character> charsWithPosition = null;
+
+            LevelControls levelControls = new LevelControls();
             using (var ocrPage = _ocrEngine.Process(stackedImage, PageSegMode.SingleWord))
             {
                 char[] chars = ocrPage.GetText().Trim().Replace(" ", "").ToUpper().ToCharArray();
 
-                if (chars.Count() != blobs.Count() || chars.Count() <= 4) return null;
+                if (chars.Count() <= 5) return null;
 
+                if (chars.Count() != blobs.Count()) levelControls.ChangeOrder = true;
 
-                charsWithPosition = new List<Character>();
+                levelControls.Characters = new List<Character>();
                 int blobIndex = 0;
                 foreach (var blob in blobs)
                 {
-                    charsWithPosition.Add(new Character()
+                    if (blobIndex >= chars.Count()) break;
+
+                    levelControls.Characters.Add(new Character()
                     {
                         Char = chars[blobIndex],
                         Position = new Rectangle(blob.Rectangle.X + controlOffsetLeft + blob.Rectangle.Width / 2, blob.Rectangle.Y + controlOffsetTop + blob.Rectangle.Height / 2, blob.Rectangle.Width, blob.Rectangle.Height)
@@ -155,7 +159,7 @@ namespace WS.Wscapes
             }
 
             AppState.IsFourWordsOnly = IsFourWordsOnly(screenshot_segmented);
-            return charsWithPosition;
+            return levelControls;
 
         }
 
@@ -213,11 +217,12 @@ namespace WS.Wscapes
         }
 
 
-        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null)
+        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null,int? height=null)
         {
             if (YOffset.HasValue)
             {
-                image = CropImage(image, new Rectangle(0, YOffset.Value, image.Width, image.Height - YOffset.Value));
+                image = CropImage(image, new Rectangle(0, YOffset.Value, image.Width, height?? image.Height - YOffset.Value ));
+                image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
             }
 
             using (var ocrPage = _ocrEngine.Process(image))

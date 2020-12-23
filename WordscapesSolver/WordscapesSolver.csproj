@@ -83,6 +83,7 @@
     <Compile Include="DataTypes\Character.cs" />
     <Compile Include="DataTypes\BitmapWithYOffset.cs" />
     <Compile Include="DataTypes\GameState.cs" />
+    <Compile Include="DataTypes\LevelControls.cs" />
     <Compile Include="OCR.cs" />
     <Compile Include="WordscapesSolver.cs">
       <SubType>Form</SubType>

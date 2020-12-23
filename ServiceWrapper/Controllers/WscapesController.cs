@@ -54,6 +54,46 @@ namespace ServiceWrapper.Controllers
                         }
                     }
 
+                    if (i == 5)
+                    {
+                        bool oneM = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'M') >= 1;
+                        bool oneU = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'U') >= 1;
+                        bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
+                        bool oneT = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'T') >= 1;
+                        bool oneI = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'I') >= 1;
+                        if (oneM && oneU && oneL && oneT && oneI)
+                        {
+                            words.Add("multi");
+                        }
+                    }
+
+
+                    if (i == 4)
+                    {
+                        bool oneA = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'A') >= 1;
+                        bool oneF = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'F') >= 1;
+                        bool oneR = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'R') >= 1;
+                        bool oneO = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'O') >= 1;
+                        if (oneA && oneF && oneR && oneO)
+                        {
+                            words.Add("afro");
+                        }
+                    }
+
+
+                    if (i == 6) {
+
+                        bool twoGs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'G') >= 2;
+                        bool twoOs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'O') >= 2;
+                        bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
+                        bool oneE = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'E') >= 1;
+                        if (twoGs && twoOs && oneL && oneE)
+                        {
+                            words.Add("google");
+                        }
+
+                    }
+
                     result.Add(words);
                 }
 

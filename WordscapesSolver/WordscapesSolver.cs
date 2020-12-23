@@ -33,6 +33,8 @@ namespace WS.Wscapes
         private static System.Timers.Timer _stateTimer;
         private static System.Timers.Timer _actionTimer;
         private OCR _ocr;
+        
+        private static object _originalScreenShotLock = new object();
 
 
         private const int SCREENSHOT_TIMER_CONSTANT = 1000;
@@ -77,14 +79,35 @@ namespace WS.Wscapes
                 case GameState.Menu:
                 case GameState.LevelSolved:
                 case GameState.PiggyBank:
+                case GameState.ReOrderLevel:
                     TapScreen();
                     break;
                 case GameState.Puzzle:
-                    await SolveLevel(AppState.LevelControls);
+                    if (AppState.PreviousLevelControls != null && AppState.PreviousLevelControls.SequenceEqual(AppState.CurrentLevelControls))
+                    {
+                        SetReorderState();
+                    }
+                    else
+                    {
+                        AppState.PreviousLevelControls = AppState.CurrentLevelControls.ToList();
+                        await SolveLevel(AppState.CurrentLevelControls);
+                    }
                     break;
             }
             _actionTimer.Enabled = true;
 
+        }
+
+        private void SetReorderState()
+        {
+            //Change characters order
+            AppState.ClickPosition = new System.Drawing.Point()
+            {
+                X = 170,
+                Y = 1546
+            };
+
+            SetGameState(GameState.ReOrderLevel);
         }
 
         private void TapScreen()
@@ -207,10 +230,14 @@ namespace WS.Wscapes
                 var currentScreenshot = _driver.GetScreenshot();
                 using (var screenshotMemStream = new MemoryStream(currentScreenshot.AsByteArray))
                 {
-                    //var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
-                    AppState.OriginalScreenshot = new Bitmap(screenshotMemStream);
-                    //  AppStore.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot_thread{threadId}.png");
-                    AppState.BinarizedScreenshot = _ocr.Binarize(AppState.OriginalScreenshot);
+                    var threadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                    lock (_originalScreenShotLock)
+                    {
+                        AppState.OriginalScreenshot = new Bitmap(screenshotMemStream);
+                        AppState.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot_thread{threadId}.png");
+
+                        AppState.BinarizedScreenshot = _ocr.Binarize(AppState.OriginalScreenshot);
+                    }
                     //    AppStore.BinarizedScreenshot.Save($"App_Data\\current_screen_binarized_screenshot_thread{threadId}.png");
 
                     AppState.IsFreshScreenshot = true;
@@ -223,23 +250,13 @@ namespace WS.Wscapes
 
         private void SetGameState(Bitmap binarizedImage)
         {
-
-
-            var continueWords = new List<string> { "LEVEL", "COLLECT", "PIGGY" };
-            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, binarizedImage, 1400);
-            if (matchingWord != null)
+            //Check for continue words using binarized image
+            var foundContinueWord = CheckForContinueWords(binarizedImage);
+            if (foundContinueWord)
             {
-                //Click on that point to start the level
-                AppState.ClickPosition = new System.Drawing.Point()
-                {
-                    X = matchingWord.Value.Value.X1 + matchingWord.Value.Value.Width / 2,
-                    Y = matchingWord.Value.Value.Y1 + matchingWord.Value.Value.Height / 2
-                };
-
-                SetGameState(GameState.LevelSolved);
-
                 return;
             }
+
 
             var foundPiggyBank = CheckForPiggyBank(binarizedImage);
             if (foundPiggyBank)
@@ -250,16 +267,30 @@ namespace WS.Wscapes
             if (AppState.CurrentGameState != GameState.Puzzle)
             {
 
-                var charsWithPosition = _ocr.GetCharacterControls(binarizedImage);
-                if (charsWithPosition != null && charsWithPosition.Count() > 0)
+                var levelControls = _ocr.GetCharacterControls(binarizedImage);
+                if (levelControls != null && levelControls.Characters.Count() > 0)
                 {
-                    AppState.LevelControls = charsWithPosition;
-                    SetGameState(GameState.Puzzle);
-                    return;
+                    if (!levelControls.ChangeOrder)
+                    {
+                        AppState.CurrentLevelControls = levelControls.Characters;
+                        SetGameState(GameState.Puzzle);
+                        return;
+                    }
+                    else {
+                        SetReorderState();
+                    }
                 }
             }
 
-            //CheckForPiggyBank(binarizedImage);
+            //Check for continue words using original screenshot
+            lock (_originalScreenShotLock)
+            {
+                foundContinueWord = CheckForContinueWords(AppState.OriginalScreenshot);
+                if (foundContinueWord)
+                {
+                    return;
+                }
+            }
         }
 
         private bool CheckForPiggyBank(Bitmap binarizedImage)
@@ -276,6 +307,27 @@ namespace WS.Wscapes
                     Y = piggyPosition.Value.Value.Y1 - crossLocationOffsetY
                 };
                 SetGameState(GameState.PiggyBank);
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool CheckForContinueWords(Bitmap image)
+        {
+            var continueWords = new List<string> { "LEVEL", "COLLECT" };
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, 2000, 100);
+            if (matchingWord != null)
+            {
+                //Click on that point to start the level
+                AppState.ClickPosition = new System.Drawing.Point()
+                {
+                    X = matchingWord.Value.Value.X1 + matchingWord.Value.Value.Width / 2,
+                    Y = matchingWord.Value.Value.Y1 + matchingWord.Value.Value.Height / 2
+                };
+
+                SetGameState(GameState.LevelSolved);
+
                 return true;
             }
 

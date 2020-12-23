@@ -13,6 +13,7 @@ namespace WS.Wscapes.DataTypes
         Puzzle,
         LevelSolved,
         PiggyBank,
+        ReOrderLevel,
         Transitioning
     }
 }

@@ -17,14 +17,14 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(4, chars.Count());
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('D')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('R')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('I')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('P')));
+            Assert.AreEqual(4, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('R')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('P')));
         }
 
         [TestMethod]
@@ -35,13 +35,13 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(3, chars.Count());
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('A')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('R')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('E')));
+            Assert.AreEqual(3, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('R')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
         }
 
         [TestMethod]
@@ -52,14 +52,14 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(4, chars.Count());
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('F')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('A')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('I')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('R')));
+            Assert.AreEqual(4, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('F')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('R')));
         }
 
         [TestMethod]
@@ -70,15 +70,15 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(5, chars.Count());
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('S')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('A')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('V')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('E')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('D')));
+            Assert.AreEqual(5, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('S')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('V')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
         }
 
         [TestMethod]
@@ -89,14 +89,14 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(6, chars.Count());
-            Assert.IsNotNull(chars.Count(x => x.Char.Equals('L')) == 2);
-            Assert.IsNotNull(chars.Count(x => x.Char.Equals('E')) == 2);
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('G')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('A')));
+            Assert.AreEqual(6, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('L')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('E')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('G')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
         }
 
         [TestMethod]
@@ -107,15 +107,15 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(5, chars.Count());
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('L')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('U')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('D')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('G')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('E')));
+            Assert.AreEqual(5, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('G')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
         }
 
         [TestMethod]
@@ -126,15 +126,15 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var chars = _sut.GetCharacterControls(image);
+            var levelControls = _sut.GetCharacterControls(image);
 
             //Verify
-            Assert.AreEqual(5, chars.Count());
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('L')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('U')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('D')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('G')));
-            Assert.IsNotNull(chars.Single(x => x.Char.Equals('E')));
+            Assert.AreEqual(5, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('G')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
         }
     }
 }
