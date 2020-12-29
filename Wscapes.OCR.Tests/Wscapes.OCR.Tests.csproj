@@ -62,6 +62,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="TestCases\test.case.Level_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="TestCases\test.case.JUICIER.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestCases\test.case.HOUNDED.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestCases\test.case.Level_3.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

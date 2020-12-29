@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Android;
 using OpenQA.Selenium.Appium.Enums;
+using OpenQA.Selenium.Appium.Interfaces;
 using OpenQA.Selenium.Appium.MultiTouch;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,8 @@ namespace WS.Wscapes
         private static System.Timers.Timer _stateTimer;
         private static System.Timers.Timer _actionTimer;
         private OCR _ocr;
-        
+
+        private CharComparer _charComparer;
         private static object _originalScreenShotLock = new object();
 
 
@@ -46,6 +48,7 @@ namespace WS.Wscapes
             InitializeComponent();
 
             _ocr = new OCR();
+            _charComparer = new CharComparer();
         }
 
         private void WordscapesSolver_Load(object sender, EventArgs e)
@@ -83,7 +86,7 @@ namespace WS.Wscapes
                     TapScreen();
                     break;
                 case GameState.Puzzle:
-                    if (AppState.PreviousLevelControls != null && AppState.PreviousLevelControls.SequenceEqual(AppState.CurrentLevelControls))
+                    if (AppState.PreviousLevelControls != null && AppState.PreviousLevelControls.SequenceEqual(AppState.CurrentLevelControls, _charComparer))
                     {
                         SetReorderState();
                     }
@@ -172,6 +175,35 @@ namespace WS.Wscapes
 
                         }
                         touchAction.Release().Perform();
+
+
+                        //IMultiAction multiAction = new MultiAction(_driver);
+
+
+                        //var pressAction = (new TouchAction(_driver));
+
+
+                        //var charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[0]));
+                        //var firstCharPosition = charWithPosition.Position;
+                        //pressAction.Press(firstCharPosition.X, firstCharPosition.Y);
+                        //multiAction.Add(pressAction);
+                        //charWithPosition.IsSelected = true;
+                        //for (int charIndex = 1; charIndex < chars.Length; charIndex++)
+                        //{
+                        //    var moveAction = (new TouchAction(_driver));
+                        //    charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[charIndex]) && !x.IsSelected);
+
+                        //    charWithPosition.IsSelected = true;
+
+                        //    moveAction.MoveTo(charWithPosition.Position.X, charWithPosition.Position.Y);
+                        //    multiAction.Add(moveAction);
+
+                        //}
+                        //var releaseAction = (new TouchAction(_driver));
+                        //releaseAction.Release();
+                        //multiAction.Add(releaseAction);
+
+                        //_driver.PerformMultiAction(multiAction);
                     }
                 }
 
@@ -276,7 +308,8 @@ namespace WS.Wscapes
                         SetGameState(GameState.Puzzle);
                         return;
                     }
-                    else {
+                    else
+                    {
                         SetReorderState();
                     }
                 }
@@ -316,7 +349,7 @@ namespace WS.Wscapes
         private bool CheckForContinueWords(Bitmap image)
         {
             var continueWords = new List<string> { "LEVEL", "COLLECT" };
-            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, 2000, 100);
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, 2020, 70);
             if (matchingWord != null)
             {
                 //Click on that point to start the level
@@ -393,6 +426,27 @@ namespace WS.Wscapes
                 _driver = null;
             }
             base.Dispose(disposing);
+        }
+
+
+        public class CharComparer : IEqualityComparer<Character>
+        {
+            public bool Equals(Character c1, Character c2)
+            {
+                if (c1.Char == c2.Char)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            public int GetHashCode(Character obj)
+            {
+                return int.Parse(obj.Char.ToString());
+            }
         }
     }
 }

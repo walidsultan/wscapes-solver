@@ -34,7 +34,7 @@ namespace WordscapesSolver.OCR.Tests
 
             //Execute
             var binarizedImage = _sut.Binarize(image);
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, binarizedImage, 2000,100);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, binarizedImage, 2020, 70);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -52,7 +52,7 @@ namespace WordscapesSolver.OCR.Tests
 
             //Execute
             var binarizedImage = _sut.Binarize(image);
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, binarizedImage, 2000,100);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, binarizedImage, 2020, 70);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -81,7 +81,7 @@ namespace WordscapesSolver.OCR.Tests
 
             //Execute
             var binarizedImage = _sut.Binarize(image);
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, binarizedImage, 2000, 100);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, binarizedImage, 2020, 70);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -96,8 +96,24 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-           // var binarizedImage = _sut.Binarize(image);
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, 2000, 100);
+            // var binarizedImage = _sut.Binarize(image);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, 2020, 70);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Word_Detection_LEVEL_4()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\test.case.level_4.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+
+            //Execute
+            var binarizedImage = _sut.Binarize(image);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL"}, binarizedImage, 2020, 70);
 
             //Verify
             Assert.IsNotNull(matchingWord);

@@ -20,58 +20,6 @@ namespace WS.Wscapes
             _ocrEngine = new TesseractEngine(@"./App_Data/tessdata", "eng", EngineMode.Default);
         }
 
-        //public IEnumerable<Character> GetCharacterControls(Bitmap screenshot_segmented)
-        //{
-        //    int controlOffsetLeft = 227;
-        //    int controlOffsetTop = 1500;
-        //    //int controlOffsetWidth = 524;
-        //    int controlOffsetWidth = 644;
-        //    //int controlOffsetHeight = 503;
-        //    int controlOffsetHeight = 753;
-
-        //    screenshot_segmented = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
-        //    screenshot_segmented.Save($"App_Data\\current_cropped_controls.png");
-
-        //    var dividedImages = CutRows(screenshot_segmented);
-        //    int count = 0;
-        //    List<Character> ocrChars = new List<Character>();
-        //    foreach (var img in dividedImages)
-        //    {
-        //        img.Image.Save($"App_Data\\current_screenshot_cut{count}.png");
-        //        count++;
-
-        //        using (var ocrPage = _ocrEngine.Process(img.Image, PageSegMode.SingleLine))
-        //        {
-        //            //var text = ocrPage.GetText();
-        //            using (var iter = ocrPage.GetIterator())
-        //            {
-        //                iter.Begin();
-        //                //stringWriter.WriteLine(iter.GetText(PageIteratorLevel.Word));
-        //                do
-        //                {
-        //                    string ocrWord = iter.GetText(PageIteratorLevel.Symbol);
-
-        //                    if (string.IsNullOrEmpty(ocrWord)) continue;
-
-        //                    if (IsAlphabet(ocrWord))
-        //                    {
-        //                        iter.TryGetBoundingBox(PageIteratorLevel.Word, out Rect characterPosition);
-
-        //                        ocrChars.Add(new Character()
-        //                        {
-        //                            Char = ocrWord.Trim(),
-        //                            Position = new Rect(characterPosition.X1 + controlOffsetLeft + characterPosition.Width / 2, characterPosition.Y1 + controlOffsetTop + img.YOffset + characterPosition.Height / 2, characterPosition.Width, characterPosition.Height)
-        //                        });
-        //                    }
-        //                } while (iter.Next(PageIteratorLevel.Symbol));
-
-        //            }
-        //        }
-        //    }
-
-        //    return ocrChars;
-        //}
-
 
         public LevelControls GetCharacterControls(Bitmap screenshot_segmented)
         {
@@ -98,7 +46,7 @@ namespace WS.Wscapes
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(inverted_controls);
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 13500);
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 3000 && x.Area < 13500 || (x.Area >= 2750 && x.Area<=2795));  //The smallest character I size is 2794
             if (blobs.Count() == 0) return null;
 
             //Cut the Characters
@@ -139,7 +87,7 @@ namespace WS.Wscapes
             {
                 char[] chars = ocrPage.GetText().Trim().Replace(" ", "").ToUpper().ToCharArray();
 
-                if (chars.Count() <= 5) return null;
+                if (chars.Count() < 4) return null;
 
                 if (chars.Count() != blobs.Count()) levelControls.ChangeOrder = true;
 
@@ -168,7 +116,7 @@ namespace WS.Wscapes
             return new Rectangle(rectangle.X - padding, rectangle.Y - padding, rectangle.Width + 2 * padding, rectangle.Height + 2 * padding);
         }
 
-        public Bitmap Binarize(Bitmap image, bool invert = true, int lowThreshold = 0)
+        public Bitmap Binarize(Bitmap image, bool invert = true)
         {
             Bitmap sharpenImage = new Bitmap(image.Width, image.Height);
 
@@ -183,8 +131,8 @@ namespace WS.Wscapes
                 {
 
                     if ((image.GetPixel(x, y).R >= highThreshold && image.GetPixel(x, y).G >= highThreshold && image.GetPixel(x, y).B >= highThreshold) ||
-                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0) ||
-                        (image.GetPixel(x, y).R == 96 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 46))
+                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0))//B ||
+                                                                                                                    // (image.GetPixel(x, y).R == 96 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 46))
                     {
                         sharpenImage.SetPixel(x, y, invert ? Color.Black : Color.White);
                     }
@@ -217,11 +165,11 @@ namespace WS.Wscapes
         }
 
 
-        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null,int? height=null)
+        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null, int? height = null)
         {
             if (YOffset.HasValue)
             {
-                image = CropImage(image, new Rectangle(0, YOffset.Value, image.Width, height?? image.Height - YOffset.Value ));
+                image = CropImage(image, new Rectangle(0, YOffset.Value, image.Width, height ?? image.Height - YOffset.Value));
                 image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
             }
 
