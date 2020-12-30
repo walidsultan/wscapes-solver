@@ -46,11 +46,11 @@ namespace WS.Wscapes
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(inverted_controls);
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 3000 && x.Area < 13500 || (x.Area >= 2750 && x.Area<=2795));  //The smallest character I size is 2794
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 13500 && (x.Rectangle.Height>100 & x.Rectangle.Height<160) ); // || (x.Area >= 2750 && x.Area<=2795));  //The smallest character I size is 2794
             if (blobs.Count() == 0) return null;
 
             //Cut the Characters
-            var cropPadding = 10;
+            var cropPadding = 50;
             List<Bitmap> charImages = new List<Bitmap>();
             foreach (var blob in blobs)
             {

@@ -38,11 +38,13 @@ namespace WS.Wscapes
         private CharComparer _charComparer;
         private static object _originalScreenShotLock = new object();
 
-
         private const int SCREENSHOT_TIMER_CONSTANT = 1000;
-        //private const int STATE_TIMER_CONSTANT = 1373;
         private const int STATE_TIMER_CONSTANT = 100;
         private const int ACTION_TIMER_CONSTANT = 100;
+
+        private const string START_TOUCH_SCRIPT = "su -c 'sendevent /dev/input/event2 3 57 13;";
+        private const string POSITION_SCRIPT = "sendevent /dev/input/event2 3 53 {0};sendevent /dev/input/event2 3 54 {1};sendevent /dev/input/event2 3 58 17;sendevent /dev/input/event2 0 0 0;";
+        private const string END_TOUCH_SCRIPT = "sendevent /dev/input/event2 3 57 -1;sendevent /dev/input/event2 0 0 0;'";
         public WordscapesSolver()
         {
             InitializeComponent();
@@ -137,6 +139,8 @@ namespace WS.Wscapes
 
         private async Task SolveLevel(IEnumerable<Character> charsWithPosition)
         {
+
+
             if (charsWithPosition != null && charsWithPosition.Count() > 0)
             {
                 string allChars = string.Concat(charsWithPosition.Select(x => x.Char).ToArray());
@@ -158,12 +162,13 @@ namespace WS.Wscapes
 
                         var chars = word.ToUpper().ToCharArray();
 
-                        var touchAction = (new TouchAction(_driver));
 
                         var charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[0]));
                         var firstCharPosition = charWithPosition.Position;
-                        touchAction.Press(firstCharPosition.X, firstCharPosition.Y);
                         charWithPosition.IsSelected = true;
+                        string wordScript = START_TOUCH_SCRIPT;
+                        wordScript += string.Format(POSITION_SCRIPT, firstCharPosition.X, firstCharPosition.Y);
+
                         for (int charIndex = 1; charIndex < chars.Length; charIndex++)
                         {
 
@@ -171,39 +176,14 @@ namespace WS.Wscapes
 
                             charWithPosition.IsSelected = true;
 
-                            touchAction.MoveTo(charWithPosition.Position.X, charWithPosition.Position.Y);
-
+                            wordScript += string.Format(POSITION_SCRIPT, charWithPosition.Position.X, charWithPosition.Position.Y);
                         }
-                        touchAction.Release().Perform();
+                        wordScript += END_TOUCH_SCRIPT;
 
+                        var args = new Dictionary<string, string>();
+                        args.Add("command", wordScript);
+                        _driver.ExecuteScript("mobile: shell", args);
 
-                        //IMultiAction multiAction = new MultiAction(_driver);
-
-
-                        //var pressAction = (new TouchAction(_driver));
-
-
-                        //var charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[0]));
-                        //var firstCharPosition = charWithPosition.Position;
-                        //pressAction.Press(firstCharPosition.X, firstCharPosition.Y);
-                        //multiAction.Add(pressAction);
-                        //charWithPosition.IsSelected = true;
-                        //for (int charIndex = 1; charIndex < chars.Length; charIndex++)
-                        //{
-                        //    var moveAction = (new TouchAction(_driver));
-                        //    charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[charIndex]) && !x.IsSelected);
-
-                        //    charWithPosition.IsSelected = true;
-
-                        //    moveAction.MoveTo(charWithPosition.Position.X, charWithPosition.Position.Y);
-                        //    multiAction.Add(moveAction);
-
-                        //}
-                        //var releaseAction = (new TouchAction(_driver));
-                        //releaseAction.Release();
-                        //multiAction.Add(releaseAction);
-
-                        //_driver.PerformMultiAction(multiAction);
                     }
                 }
 
