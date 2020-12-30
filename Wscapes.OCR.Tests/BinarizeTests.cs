@@ -14,7 +14,7 @@ namespace WordscapesSolver.OCR.Tests
         public void UT_Controls_Detection_4WordOnly()
         {
             //Setup
-            Bitmap image = new Bitmap(@"TestCases\IsFourWordsOnly_Before.png");
+            Bitmap image = new Bitmap(@"TestCases\IsFourWordsOnly_Before_3.png");
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
@@ -28,12 +28,6 @@ namespace WordscapesSolver.OCR.Tests
             isFourWordsOnly = _sut.IsFourWordsOnly(image);
             //Verify
             Assert.IsFalse(isFourWordsOnly);
-
-            //Execute
-            image = new Bitmap(@"TestCases\IsFourWordsOnly_Before_2.png");
-            isFourWordsOnly = _sut.IsFourWordsOnly(image);
-            //Verify
-            Assert.IsTrue(isFourWordsOnly);
         }
 
     }

@@ -38,15 +38,19 @@ namespace WS.Wscapes
             var controlsImage = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
             controlsImage.Save($"App_Data\\current_cropped_controls.png");
 
-            var inverted_controls = (Bitmap)controlsImage.Clone();
-            Invert(inverted_controls);
-            inverted_controls.Save($"App_Data\\current_cropped_controls_inverted.png");
+            //var binarizedImage = Binarize(controlsImage);
+
+            //var inverted_controls = (Bitmap)binarizedImage.Clone();
+            //Invert(inverted_controls);
+
+            var invertedControls = Binarize(controlsImage, false);
+            invertedControls.Save($"App_Data\\current_cropped_controls_inverted.png");
 
 
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
-            blobCounter.ProcessImage(inverted_controls);
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 13500 && (x.Rectangle.Height>100 & x.Rectangle.Height<160) ); // || (x.Area >= 2750 && x.Area<=2795));  //The smallest character I size is 2794
+            blobCounter.ProcessImage(invertedControls);
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 13500 && (x.Rectangle.Height > 120 & x.Rectangle.Height < 160));
             if (blobs.Count() == 0) return null;
 
             //Cut the Characters
@@ -116,7 +120,7 @@ namespace WS.Wscapes
             return new Rectangle(rectangle.X - padding, rectangle.Y - padding, rectangle.Width + 2 * padding, rectangle.Height + 2 * padding);
         }
 
-        public Bitmap Binarize(Bitmap image, bool invert = true)
+        private Bitmap Binarize(Bitmap image, bool invert = true)
         {
             Bitmap sharpenImage = new Bitmap(image.Width, image.Height);
 
@@ -154,6 +158,7 @@ namespace WS.Wscapes
             image.Save($"App_Data\\IsFourWordsOnly_Before.png");
 
             var fourWordsOnly = CropImage(image, new Rectangle(200, image.Height - 114, squareWidth, squareHeight));
+            fourWordsOnly = Binarize(fourWordsOnly);
 
             fourWordsOnly.Save($"App_Data\\IsFourWordsOnly_After.png");
 
@@ -165,64 +170,46 @@ namespace WS.Wscapes
         }
 
 
-        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, int? YOffset = null, int? height = null)
+        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, bool binarizeImage, int? xOffset = null, int? YOffset = null, int? height = null, int? width = null)
         {
-            if (YOffset.HasValue)
+            if (YOffset.HasValue || xOffset.HasValue)
             {
-                image = CropImage(image, new Rectangle(0, YOffset.Value, image.Width, height ?? image.Height - YOffset.Value));
+                image = CropImage(image, new Rectangle(xOffset ?? 0, YOffset.Value, width ?? image.Width, height ?? image.Height - YOffset.Value));
                 image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
             }
 
-            using (var ocrPage = _ocrEngine.Process(image))
+            //binarize image
+            var ocrImage = image;
+            if (binarizeImage)
+            {
+                ocrImage = Binarize(image);
+                ocrImage.Save("App_Data\\GetFirstMatchingWordCoordinates_binarized.png");
+            }
+
+            using (var ocrPage = _ocrEngine.Process(ocrImage, PageSegMode.SingleLine))
             {
                 using (var iter = ocrPage.GetIterator())
                 {
                     iter.Begin();
-                    //stringWriter.WriteLine(iter.GetText(PageIteratorLevel.Word));
                     do
                     {
-                        do
+                        string ocrWord = iter.GetText(PageIteratorLevel.Word);
+
+                        if (ocrWord != null)
                         {
-                            do
+                            string matchingWord = words.FirstOrDefault(x => ocrWord.Contains(x));
+
+                            if (matchingWord != null)
                             {
-                                do
+                                iter.TryGetBoundingBox(PageIteratorLevel.Word, out Rect wordPosition);
+                                if (YOffset.HasValue)
                                 {
-                                    //if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-                                    //{
-                                    //    stringWriter.WriteLine("<BLOCK>");
-                                    //}
-
-                                    string ocrWord = iter.GetText(PageIteratorLevel.Word);
-
-                                    if (ocrWord != null)
-                                    {
-                                        string matchingWord = words.FirstOrDefault(x => ocrWord.Contains(x));
-
-                                        if (matchingWord != null)
-                                        {
-                                            iter.TryGetBoundingBox(PageIteratorLevel.Word, out Rect wordPosition);
-                                            if (YOffset.HasValue)
-                                            {
-                                                wordPosition = new Rect(wordPosition.X1, wordPosition.Y1 + YOffset.Value, wordPosition.Width, wordPosition.Height);
-                                            }
-                                            return new KeyValuePair<string, Rect>(matchingWord, wordPosition);
-                                        }
-                                    }
-                                    //stringWriter.Write(" ");
-
-                                    //if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
-                                    //{
-                                    //    stringWriter.WriteLine();
-                                    //}
-                                } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
-
-                                //if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
-                                //{
-                                //    stringWriter.WriteLine();
-                                //}
-                            } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                        } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-                    } while (iter.Next(PageIteratorLevel.Block));
+                                    wordPosition = new Rect(wordPosition.X1+xOffset.Value, wordPosition.Y1 + YOffset.Value, wordPosition.Width, wordPosition.Height);
+                                }
+                                return new KeyValuePair<string, Rect>(matchingWord, wordPosition);
+                            }
+                        }
+                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
                 }
             }
             return null;
@@ -283,9 +270,10 @@ namespace WS.Wscapes
 
         private static Bitmap CropImage(Bitmap img, Rectangle cropArea)
         {
+            Bitmap croppedImage = new Bitmap(img);
             Crop filter = new Crop(cropArea);
             // apply the filter
-            return filter.Apply(img);
+            return filter.Apply(croppedImage);
 
             // return img.Clone(cropArea, img.PixelFormat);
         }
