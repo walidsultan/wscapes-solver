@@ -10,6 +10,10 @@ namespace WordscapesSolver.OCR.Tests
     [TestClass]
     public class WordDetectionTests
     {
+        private const int OCR_MATHCING_WORD_LEFT = 440;
+        private const int OCR_MATHCING_WORD_TOP = 2020;
+        private const int OCR_MATHCING_WORD_WIDTH = 590;
+        private const int OCR_MATHCING_WORD_HEIGHT = 70;
 
         [TestMethod]
         public void UT_Word_Detection_Collection_ND()
@@ -19,7 +23,7 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, true, 400, 2020, 70, 600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, true, OCR_MATHCING_WORD_LEFT, OCR_MATHCING_WORD_TOP, OCR_MATHCING_WORD_HEIGHT, OCR_MATHCING_WORD_WIDTH);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -36,7 +40,7 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, true, 400, 2020, 70, 600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, true, OCR_MATHCING_WORD_LEFT, OCR_MATHCING_WORD_TOP, OCR_MATHCING_WORD_HEIGHT, OCR_MATHCING_WORD_WIDTH);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -51,7 +55,7 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, true, 400, 2020, 70, 600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, true, OCR_MATHCING_WORD_LEFT, OCR_MATHCING_WORD_TOP, OCR_MATHCING_WORD_HEIGHT, OCR_MATHCING_WORD_WIDTH);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -67,7 +71,7 @@ namespace WordscapesSolver.OCR.Tests
 
             //Execute
             // var binarizedImage = _sut.Binarize(image);
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, false, 400, 2020, 70, 600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL", "COLLECT" }, image, false, OCR_MATHCING_WORD_LEFT, OCR_MATHCING_WORD_TOP, OCR_MATHCING_WORD_HEIGHT, OCR_MATHCING_WORD_WIDTH);
 
             //Verify
             Assert.IsNotNull(matchingWord);
@@ -82,7 +86,22 @@ namespace WordscapesSolver.OCR.Tests
             WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
 
             //Execute
-            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL"}, image, true, 400, 2020, 70, 600);
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, OCR_MATHCING_WORD_LEFT, OCR_MATHCING_WORD_TOP, OCR_MATHCING_WORD_HEIGHT, OCR_MATHCING_WORD_WIDTH);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Word_Detection_LEVEL_5()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\test.case.level_5.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, OCR_MATHCING_WORD_LEFT, OCR_MATHCING_WORD_TOP, OCR_MATHCING_WORD_HEIGHT, OCR_MATHCING_WORD_WIDTH);
 
             //Verify
             Assert.IsNotNull(matchingWord);

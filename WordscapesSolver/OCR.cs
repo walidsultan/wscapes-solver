@@ -135,8 +135,8 @@ namespace WS.Wscapes
                 {
 
                     if ((image.GetPixel(x, y).R >= highThreshold && image.GetPixel(x, y).G >= highThreshold && image.GetPixel(x, y).B >= highThreshold) ||
-                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0))//B ||
-                                                                                                                    // (image.GetPixel(x, y).R == 96 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 46))
+                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0)||
+                        (image.GetPixel(x, y).R == 96 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 46))
                     {
                         sharpenImage.SetPixel(x, y, invert ? Color.Black : Color.White);
                     }

@@ -41,14 +41,20 @@ namespace WS.Wscapes
         private const int SCREENSHOT_TIMER_CONSTANT = 1000;
         private const int STATE_TIMER_CONSTANT = 100;
         private const int ACTION_TIMER_CONSTANT = 100;
-        
-        private const int IMPLICIT_WAIT_TIME = 1500;
+
+        private const int IMPLICIT_WAIT_TIME = 2000;
 
         private const string START_TOUCH_SCRIPT = "su -c 'sendevent /dev/input/event2 3 57 13;";
         private const string POSITION_SCRIPT = "sendevent /dev/input/event2 3 53 {0};sendevent /dev/input/event2 3 54 {1};sendevent /dev/input/event2 3 58 17;sendevent /dev/input/event2 0 0 0;";
         private const string END_TOUCH_SCRIPT = "sendevent /dev/input/event2 3 57 -1;sendevent /dev/input/event2 0 0 0;'";
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+
+        private const int OCR_MATHCING_CONTINUE_WORD_LEFT = 440;
+        private const int OCR_MATHCING_CONTINUE_WORD_TOP = 2020;
+        private const int OCR_MATHCING_CONTINUE_WORD_WIDTH = 590;
+        private const int OCR_MATHCING_CONTINUE_WORD_HEIGHT = 70;
         public WordscapesSolver()
         {
             InitializeComponent();
@@ -100,6 +106,7 @@ namespace WS.Wscapes
                     else
                     {
                         AppState.PreviousLevelControls = AppState.CurrentLevelControls.ToList();
+                        log.Info($"Start solve level. Controls: {new string(AppState.CurrentLevelControls.Select(x => x.Char).ToArray())}");
                         await SolveLevel(AppState.CurrentLevelControls);
                     }
                     break;
@@ -124,6 +131,8 @@ namespace WS.Wscapes
         {
             if (AppState.CurrentGameState != GameState.Transitioning)
             {
+                log.Info($"Tapping screen at X: {AppState.ClickPosition.X}, Y:{AppState.ClickPosition.Y}");
+
                 (new TouchAction(_driver)).Tap(AppState.ClickPosition.X, AppState.ClickPosition.Y).Perform();
 
                 System.Threading.Thread.Sleep(IMPLICIT_WAIT_TIME);
@@ -191,9 +200,12 @@ namespace WS.Wscapes
                         args.Add("command", wordScript);
                         _driver.ExecuteScript("mobile: shell", args);
 
+                        System.Threading.Thread.Sleep(100);
+
                     }
                 }
 
+                System.Threading.Thread.Sleep(IMPLICIT_WAIT_TIME);
                 SetGameState(GameState.Transitioning);
             }
         }
@@ -248,6 +260,8 @@ namespace WS.Wscapes
 
             if (AppState.CurrentGameState != GameState.Puzzle)
             {
+                log.Info("Getting phone screenshot");
+
                 var currentScreenshot = _driver.GetScreenshot();
                 using (var screenshotMemStream = new MemoryStream(currentScreenshot.AsByteArray))
                 {
@@ -258,6 +272,8 @@ namespace WS.Wscapes
                         AppState.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot.png");
 
                         AppState.IsFreshScreenshot = true;
+
+                        log.Info("phone screenshot - saved");
                     }
                     //    AppStore.BinarizedScreenshot.Save($"App_Data\\current_screen_binarized_screenshot_thread{threadId}.png");
 
@@ -272,47 +288,56 @@ namespace WS.Wscapes
         {
             lock (_originalScreenShotLock)
             {
-                //Check for continue words using binarized image
-                var foundContinueWord = CheckForContinueWords(image, false);
-                if (foundContinueWord)
+                log.Info($"Start - Set Game State - Current state:{AppState.CurrentGameState}");
+
+                try
                 {
-                    return;
-                }
-
-
-                var foundPiggyBank = CheckForPiggyBank(image);
-                if (foundPiggyBank)
-                {
-                    return;
-                }
-
-                if (AppState.CurrentGameState != GameState.Puzzle)
-                {
-
-                    var levelControls = _ocr.GetCharacterControls(image);
-                    if (levelControls != null && levelControls.Characters.Count() > 0)
+                    //Check for continue words using binarized image
+                    var foundContinueWord = CheckForContinueWords(image, false);
+                    if (foundContinueWord)
                     {
-                        if (!levelControls.ChangeOrder)
-                        {
-                            AppState.CurrentLevelControls = levelControls.Characters;
-                            SetGameState(GameState.Puzzle);
-                            return;
-                        }
-                        else
-                        {
-                            log.Info("Set re-order state. OCR problem.");
+                        return;
+                    }
 
-                            SetReorderState();
+
+                    var foundPiggyBank = CheckForPiggyBank(image);
+                    if (foundPiggyBank)
+                    {
+                        return;
+                    }
+
+                    if (AppState.CurrentGameState != GameState.Puzzle)
+                    {
+
+                        var levelControls = _ocr.GetCharacterControls(image);
+                        if (levelControls != null && levelControls.Characters.Count() > 0)
+                        {
+                            if (!levelControls.ChangeOrder)
+                            {
+                                AppState.CurrentLevelControls = levelControls.Characters;
+                                SetGameState(GameState.Puzzle);
+                                return;
+                            }
+                            else
+                            {
+                                log.Info("Set re-order state. OCR problem.");
+
+                                SetReorderState();
+                            }
                         }
                     }
+
+                    //Check for continue words for binarized image
+
+                    foundContinueWord = CheckForContinueWords(image, true);
+                    if (foundContinueWord)
+                    {
+                        return;
+                    }
                 }
-
-                //Check for continue words for binarized image
-
-                foundContinueWord = CheckForContinueWords(image, true);
-                if (foundContinueWord)
+                finally
                 {
-                    return;
+                    log.Info($"End - Game State: {AppState.CurrentGameState}");
                 }
             }
         }
@@ -340,7 +365,7 @@ namespace WS.Wscapes
         private bool CheckForContinueWords(Bitmap image, bool binarizeImage)
         {
             var continueWords = new List<string> { "LEVEL", "COLLECT" };
-            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, binarizeImage, 400, 2020, 70, 600);
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, binarizeImage, OCR_MATHCING_CONTINUE_WORD_LEFT, OCR_MATHCING_CONTINUE_WORD_TOP, OCR_MATHCING_CONTINUE_WORD_HEIGHT, OCR_MATHCING_CONTINUE_WORD_WIDTH);
             if (matchingWord != null)
             {
                 //Click on that point to start the level
