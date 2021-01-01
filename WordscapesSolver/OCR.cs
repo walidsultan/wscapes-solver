@@ -30,9 +30,9 @@ namespace WS.Wscapes
             //int controlOffsetHeight = 840;
 
             //Pixel XL
-            int controlOffsetLeft = 227;
+            int controlOffsetLeft = 247;
             int controlOffsetTop = 1500;
-            int controlOffsetWidth = 954;
+            int controlOffsetWidth = 934;
             int controlOffsetHeight = 1040;
 
             var controlsImage = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
@@ -91,7 +91,7 @@ namespace WS.Wscapes
             {
                 char[] chars = ocrPage.GetText().Trim().Replace(" ", "").ToUpper().ToCharArray();
 
-                if (chars.Count() < 4) return null;
+               // if (chars.Count() < 4) return null;
 
                 if (chars.Count() != blobs.Count()) levelControls.ChangeOrder = true;
 

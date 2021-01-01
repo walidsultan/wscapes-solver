@@ -55,16 +55,24 @@ namespace WS.Wscapes
         private const int OCR_MATHCING_CONTINUE_WORD_TOP = 2020;
         private const int OCR_MATHCING_CONTINUE_WORD_WIDTH = 590;
         private const int OCR_MATHCING_CONTINUE_WORD_HEIGHT = 70;
+
+        private SwipeMethod _swipeMethod;
         public WordscapesSolver()
         {
             InitializeComponent();
 
             _ocr = new OCR();
             _charComparer = new CharComparer();
+            _swipeMethod = SwipeMethod.Native;
+
+
         }
 
         private void WordscapesSolver_Load(object sender, EventArgs e)
         {
+            var swipeMethods = Enum.GetValues(typeof(SwipeMethod)).Cast<SwipeMethod>().Select(x => x.ToString()).ToArray();
+            cbSwipeMethod.Items.AddRange(swipeMethods);
+            cbSwipeMethod.SelectedItem = _swipeMethod.ToString();
         }
 
         private void SetTimers()
@@ -155,8 +163,6 @@ namespace WS.Wscapes
 
         private async Task SolveLevel(IEnumerable<Character> charsWithPosition)
         {
-
-
             if (charsWithPosition != null && charsWithPosition.Count() > 0)
             {
                 string allChars = string.Concat(charsWithPosition.Select(x => x.Char).ToArray());
@@ -176,38 +182,69 @@ namespace WS.Wscapes
                             cwp.IsSelected = false;
                         }
 
-                        var chars = word.ToUpper().ToCharArray();
+                        var wordChars = word.ToUpper().ToCharArray();
 
-
-                        var charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[0]));
-                        var firstCharPosition = charWithPosition.Position;
-                        charWithPosition.IsSelected = true;
-                        string wordScript = START_TOUCH_SCRIPT;
-                        wordScript += string.Format(POSITION_SCRIPT, firstCharPosition.X, firstCharPosition.Y);
-
-                        for (int charIndex = 1; charIndex < chars.Length; charIndex++)
+                        switch (_swipeMethod)
                         {
-
-                            charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[charIndex]) && !x.IsSelected);
-
-                            charWithPosition.IsSelected = true;
-
-                            wordScript += string.Format(POSITION_SCRIPT, charWithPosition.Position.X, charWithPosition.Position.Y);
+                            case SwipeMethod.Appium:
+                                WriteWordUsingAppium(charsWithPosition, wordChars);
+                                break;
+                            case SwipeMethod.Native:
+                                WriteWordUsingMobileShell(charsWithPosition, wordChars);
+                                System.Threading.Thread.Sleep(100);
+                                break;
                         }
-                        wordScript += END_TOUCH_SCRIPT;
-
-                        var args = new Dictionary<string, string>();
-                        args.Add("command", wordScript);
-                        _driver.ExecuteScript("mobile: shell", args);
-
-                        System.Threading.Thread.Sleep(100);
-
                     }
                 }
 
                 System.Threading.Thread.Sleep(IMPLICIT_WAIT_TIME);
                 SetGameState(GameState.Transitioning);
             }
+        }
+
+        private void WriteWordUsingMobileShell(IEnumerable<Character> charsWithPosition, char[] wordChars)
+        {
+            var charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(wordChars[0]));
+            var firstCharPosition = charWithPosition.Position;
+            charWithPosition.IsSelected = true;
+            string wordScript = START_TOUCH_SCRIPT;
+            wordScript += string.Format(POSITION_SCRIPT, firstCharPosition.X, firstCharPosition.Y);
+
+            for (int charIndex = 1; charIndex < wordChars.Length; charIndex++)
+            {
+
+                charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(wordChars[charIndex]) && !x.IsSelected);
+
+                charWithPosition.IsSelected = true;
+
+                wordScript += string.Format(POSITION_SCRIPT, charWithPosition.Position.X, charWithPosition.Position.Y);
+            }
+            wordScript += END_TOUCH_SCRIPT;
+
+            var args = new Dictionary<string, string>();
+            args.Add("command", wordScript);
+            _driver.ExecuteScript("mobile: shell", args);
+        }
+
+
+        private void WriteWordUsingAppium(IEnumerable<Character> charsWithPosition, char[] chars)
+        {
+            var charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[0]));
+            var firstCharPosition = charWithPosition.Position;
+            charWithPosition.IsSelected = true;
+
+            var touchAction = (new TouchAction(_driver));
+            touchAction.Press(firstCharPosition.X, firstCharPosition.Y);
+
+            for (int charIndex = 1; charIndex < chars.Length; charIndex++)
+            {
+                charWithPosition = charsWithPosition.FirstOrDefault(x => x.Char.Equals(chars[charIndex]) && !x.IsSelected);
+
+                charWithPosition.IsSelected = true;
+
+                touchAction.MoveTo(charWithPosition.Position.X, charWithPosition.Position.Y);
+            }
+            touchAction.Release().Perform();
         }
 
         private void _stateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -468,6 +505,17 @@ namespace WS.Wscapes
             {
                 return int.Parse(obj.Char.ToString());
             }
+        }
+
+        public enum SwipeMethod
+        {
+            Appium,
+            Native
+        }
+
+        private void cbSwipeMethod_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _swipeMethod = (SwipeMethod)Enum.Parse(typeof(SwipeMethod), cbSwipeMethod.SelectedItem.ToString());
         }
     }
 }
