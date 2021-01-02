@@ -47,81 +47,9 @@ namespace ServiceWrapper.Controllers
                         words = wordsNode.Descendants("p").Select(x => x.InnerText).ToList();
                     }
 
-                    if (i == 3)
-                    {
-                        bool twoMs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'M') >= 2;
-                        bool oneA = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'A') >= 1;
-                        if (twoMs && oneA)
-                        {
-                            words.Add("mam");
-                        }
-                    }
+                    words.AddRange(GetMissingWords(letters, i));
 
-                    if (i == 5)
-                    {
-                        bool oneM = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'M') >= 1;
-                        bool oneU = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'U') >= 1;
-                        bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
-                        bool oneT = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'T') >= 1;
-                        bool oneI = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'I') >= 1;
-                        if (oneM && oneU && oneL && oneT && oneI)
-                        {
-                            words.Add("multi");
-                        }
-                    }
-
-
-                    if (i == 4)
-                    {
-                        bool oneA = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'A') >= 1;
-                        bool oneF = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'F') >= 1;
-                        bool oneR = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'R') >= 1;
-                        bool oneO = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'O') >= 1;
-                        if (oneA && oneF && oneR && oneO)
-                        {
-                            words.Add("afro");
-                        }
-                    }
-
-
-                    if (i == 6)
-                    {
-
-                        bool twoGs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'G') >= 2;
-                        bool twoOs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'O') >= 2;
-                        bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
-                        bool oneE = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'E') >= 1;
-                        if (twoGs && twoOs && oneL && oneE)
-                        {
-                            words.Add("google");
-                        }
-
-                    }
-
-
-                    if (i == 5)
-                    {
-
-                        bool oneB = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'B') >= 1;
-                        bool oneI = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'I') >= 1;
-                        bool oneR = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'R') >= 1;
-                        bool oneD = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'D') >= 1;
-                        bool oneY = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'Y') >= 1;
-                        if (oneB && oneI && oneR && oneD && oneY)
-                        {
-                            words.Add("birdy");
-                        }
-
-                        bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
-                        bool oneN = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'N') >= 1;
-                        bool oneG = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'G') >= 1;
-                        if (oneB && oneL && oneI && oneN && oneG)
-                        {
-                            words.Add("bling");
-                        }
-                    }
-
-                    if (words.Count()==0) continue;
+                    if (words.Count() == 0) continue;
 
 
                     result.Add(words);
@@ -130,6 +58,87 @@ namespace ServiceWrapper.Controllers
             }
 
             return result;
+        }
+
+        private static List<string> GetMissingWords(string letters, int wordLength)
+        {
+            List<string> missingWords = new List<string>();
+
+            if (wordLength == 3)
+            {
+                bool twoMs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'M') >= 2;
+                bool oneA = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'A') >= 1;
+                if (twoMs && oneA)
+                {
+                    missingWords.Add("mam");
+                }
+            }
+
+            if (wordLength == 5)
+            {
+                bool oneM = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'M') >= 1;
+                bool oneU = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'U') >= 1;
+                bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
+                bool oneT = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'T') >= 1;
+                bool oneI = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'I') >= 1;
+                if (oneM && oneU && oneL && oneT && oneI)
+                {
+                    missingWords.Add("multi");
+                }
+            }
+
+
+            if (wordLength == 4)
+            {
+                bool oneA = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'A') >= 1;
+                bool oneF = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'F') >= 1;
+                bool oneR = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'R') >= 1;
+                bool oneO = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'O') >= 1;
+                if (oneA && oneF && oneR && oneO)
+                {
+                    missingWords.Add("afro");
+                }
+            }
+
+
+            if (wordLength == 6)
+            {
+
+                bool twoGs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'G') >= 2;
+                bool twoOs = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'O') >= 2;
+                bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
+                bool oneE = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'E') >= 1;
+                if (twoGs && twoOs && oneL && oneE)
+                {
+                    missingWords.Add("google");
+                }
+
+            }
+
+
+            if (wordLength == 5)
+            {
+
+                bool oneB = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'B') >= 1;
+                bool oneI = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'I') >= 1;
+                bool oneR = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'R') >= 1;
+                bool oneD = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'D') >= 1;
+                bool oneY = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'Y') >= 1;
+                if (oneB && oneI && oneR && oneD && oneY)
+                {
+                    missingWords.Add("birdy");
+                }
+
+                bool oneL = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'L') >= 1;
+                bool oneN = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'N') >= 1;
+                bool oneG = letters.ToUpper().ToCharArray().ToList().Count(x => x == 'G') >= 1;
+                if (oneB && oneL && oneI && oneN && oneG)
+                {
+                    missingWords.Add("bling");
+                }
+            }
+
+            return missingWords;
         }
     }
 }

@@ -48,6 +48,8 @@ namespace WS.Wscapes
         private const string POSITION_SCRIPT = "sendevent /dev/input/event2 3 53 {0};sendevent /dev/input/event2 3 54 {1};sendevent /dev/input/event2 3 58 17;sendevent /dev/input/event2 0 0 0;";
         private const string END_TOUCH_SCRIPT = "sendevent /dev/input/event2 3 57 -1;sendevent /dev/input/event2 0 0 0;'";
 
+        private const string WORDS_SERVICE_URL = "https://wscapes-solver.azurewebsites.net/solve?letters={0}";
+
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
 
@@ -57,6 +59,7 @@ namespace WS.Wscapes
         private const int OCR_MATHCING_CONTINUE_WORD_HEIGHT = 70;
 
         private SwipeMethod _swipeMethod;
+        private int _nativeSwipePausePerLetter = 50;
         public WordscapesSolver()
         {
             InitializeComponent();
@@ -64,7 +67,17 @@ namespace WS.Wscapes
             _ocr = new OCR();
             _charComparer = new CharComparer();
             _swipeMethod = SwipeMethod.Native;
+            txtNativeSwipePause.Text = _nativeSwipePausePerLetter.ToString();
 
+            NotifyIcon ni = new NotifyIcon();
+            ni.Icon = new Icon("App_Data/icon.ico");
+            ni.Visible = true;
+            ni.DoubleClick +=
+                delegate (object sender, EventArgs args)
+                {
+                    Show();
+                    WindowState = FormWindowState.Normal;
+                };
 
         }
 
@@ -114,7 +127,7 @@ namespace WS.Wscapes
                     else
                     {
                         AppState.PreviousLevelControls = AppState.CurrentLevelControls.ToList();
-                        log.Info($"Start solve level. Controls: {new string(AppState.CurrentLevelControls.Select(x => x.Char).ToArray())}");
+                        // log.Info($"Start solve level. Controls: {new string(AppState.CurrentLevelControls.Select(x => x.Char).ToArray())}");
                         await SolveLevel(AppState.CurrentLevelControls);
                     }
                     break;
@@ -139,7 +152,7 @@ namespace WS.Wscapes
         {
             if (AppState.CurrentGameState != GameState.Transitioning)
             {
-                log.Info($"Tapping screen at X: {AppState.ClickPosition.X}, Y:{AppState.ClickPosition.Y}");
+                //log.Info($"Tapping screen at X: {AppState.ClickPosition.X}, Y:{AppState.ClickPosition.Y}");
 
                 (new TouchAction(_driver)).Tap(AppState.ClickPosition.X, AppState.ClickPosition.Y).Perform();
 
@@ -191,7 +204,7 @@ namespace WS.Wscapes
                                 break;
                             case SwipeMethod.Native:
                                 WriteWordUsingMobileShell(charsWithPosition, wordChars);
-                                System.Threading.Thread.Sleep(100);
+                                System.Threading.Thread.Sleep(_nativeSwipePausePerLetter * word.Length);
                                 break;
                         }
                     }
@@ -297,7 +310,7 @@ namespace WS.Wscapes
 
             if (AppState.CurrentGameState != GameState.Puzzle)
             {
-                log.Info("Getting phone screenshot");
+                // log.Info("Getting phone screenshot");
 
                 var currentScreenshot = _driver.GetScreenshot();
                 using (var screenshotMemStream = new MemoryStream(currentScreenshot.AsByteArray))
@@ -310,10 +323,8 @@ namespace WS.Wscapes
 
                         AppState.IsFreshScreenshot = true;
 
-                        log.Info("phone screenshot - saved");
+                        // log.Info("phone screenshot - saved");
                     }
-                    //    AppStore.BinarizedScreenshot.Save($"App_Data\\current_screen_binarized_screenshot_thread{threadId}.png");
-
                 }
 
             }
@@ -325,7 +336,7 @@ namespace WS.Wscapes
         {
             lock (_originalScreenShotLock)
             {
-                log.Info($"Start - Set Game State - Current state:{AppState.CurrentGameState}");
+                // log.Info($"Start - Set Game State - Current state:{AppState.CurrentGameState}");
 
                 try
                 {
@@ -374,7 +385,7 @@ namespace WS.Wscapes
                 }
                 finally
                 {
-                    log.Info($"End - Game State: {AppState.CurrentGameState}");
+                    //  log.Info($"End - Game State: {AppState.CurrentGameState}");
                 }
             }
         }
@@ -424,7 +435,7 @@ namespace WS.Wscapes
         {
             using (var httpClient = new HttpClient())
             {
-                var url = $"http://localhost/wscapes/solve?letters={letters}";
+                var url = string.Format(WORDS_SERVICE_URL, letters);
 
                 var reponse = await httpClient.GetAsync(url);
 
@@ -516,6 +527,27 @@ namespace WS.Wscapes
         private void cbSwipeMethod_SelectedIndexChanged(object sender, EventArgs e)
         {
             _swipeMethod = (SwipeMethod)Enum.Parse(typeof(SwipeMethod), cbSwipeMethod.SelectedItem.ToString());
+
+            txtNativeSwipePause.Enabled = _swipeMethod == SwipeMethod.Native;
+        }
+
+        private void txtNativeSwipePause_TextChanged(object sender, EventArgs e)
+        {
+            _nativeSwipePausePerLetter = int.Parse(txtNativeSwipePause.Text);
+        }
+
+        private void txtNativeSwipePause_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void WordscapesSolver_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+                Hide();
         }
     }
 }
