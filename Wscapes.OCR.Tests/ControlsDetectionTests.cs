@@ -188,5 +188,24 @@ namespace WordscapesSolver.OCR.Tests
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('R')));
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('Y')));
         }
+
+        [TestMethod]
+        public void UT_Controls_Detection_SAVED()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\test.case.SAVED.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image);
+
+            //Verify
+            Assert.AreEqual(5, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('S')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('V')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+        }
     }
 }

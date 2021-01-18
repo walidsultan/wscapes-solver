@@ -38,7 +38,7 @@ namespace WS.Wscapes
         private CharComparer _charComparer;
         private static object _originalScreenShotLock = new object();
 
-        private const int SCREENSHOT_TIMER_CONSTANT = 1000;
+        private const int SCREENSHOT_TIMER_CONSTANT = 500;
         private const int STATE_TIMER_CONSTANT = 100;
         private const int ACTION_TIMER_CONSTANT = 100;
 
@@ -59,7 +59,9 @@ namespace WS.Wscapes
         private const int OCR_MATHCING_CONTINUE_WORD_HEIGHT = 70;
 
         private SwipeMethod _swipeMethod;
-        private int _nativeSwipePausePerLetter = 50;
+        private int _nativeSwipePausePerLetter = 1;
+
+        private int _equalCharactersSequenceCount = 0;
         public WordscapesSolver()
         {
             InitializeComponent();
@@ -121,15 +123,26 @@ namespace WS.Wscapes
                 case GameState.Puzzle:
                     if (AppState.PreviousLevelControls != null && AppState.PreviousLevelControls.SequenceEqual(AppState.CurrentLevelControls, _charComparer))
                     {
-                        log.Info("Set re-order state. Equal Sequence.");
-                        SetReorderState();
+
+                        if (_equalCharactersSequenceCount >= 1)
+                        {
+                            log.Info("Set re-order state. Equal Sequence.");
+                            SetReorderState();
+                            break;
+                        }
+                        else
+                        {
+                            _equalCharactersSequenceCount++;
+                        }
                     }
                     else
                     {
-                        AppState.PreviousLevelControls = AppState.CurrentLevelControls.ToList();
-                        // log.Info($"Start solve level. Controls: {new string(AppState.CurrentLevelControls.Select(x => x.Char).ToArray())}");
-                        await SolveLevel(AppState.CurrentLevelControls);
+                        _equalCharactersSequenceCount = 0;
                     }
+
+                    AppState.PreviousLevelControls = AppState.CurrentLevelControls.ToList();
+                    // log.Info($"Start solve level. Controls: {new string(AppState.CurrentLevelControls.Select(x => x.Char).ToArray())}");
+                    await SolveLevel(AppState.CurrentLevelControls);
                     break;
             }
             _actionTimer.Enabled = true;
@@ -181,31 +194,34 @@ namespace WS.Wscapes
                 string allChars = string.Concat(charsWithPosition.Select(x => x.Char).ToArray());
                 IEnumerable<IEnumerable<string>> solution = await GetWordsSolution(allChars);
 
-                foreach (var solutionGroup in solution)
+                if (solution != null)
                 {
-                    foreach (var word in solutionGroup)
+                    foreach (var solutionGroup in solution)
                     {
-                        if (word.Length == 3 && AppState.IsFourWordsOnly)
+                        foreach (var word in solutionGroup)
                         {
-                            break;
-                        }
-
-                        foreach (var cwp in charsWithPosition)
-                        {
-                            cwp.IsSelected = false;
-                        }
-
-                        var wordChars = word.ToUpper().ToCharArray();
-
-                        switch (_swipeMethod)
-                        {
-                            case SwipeMethod.Appium:
-                                WriteWordUsingAppium(charsWithPosition, wordChars);
+                            if (word.Length == 3 && AppState.IsFourWordsOnly)
+                            {
                                 break;
-                            case SwipeMethod.Native:
-                                WriteWordUsingMobileShell(charsWithPosition, wordChars);
-                                System.Threading.Thread.Sleep(_nativeSwipePausePerLetter * word.Length);
-                                break;
+                            }
+
+                            foreach (var cwp in charsWithPosition)
+                            {
+                                cwp.IsSelected = false;
+                            }
+
+                            var wordChars = word.ToUpper().ToCharArray();
+
+                            switch (_swipeMethod)
+                            {
+                                case SwipeMethod.Appium:
+                                    WriteWordUsingAppium(charsWithPosition, wordChars);
+                                    break;
+                                case SwipeMethod.Native:
+                                    WriteWordUsingMobileShell(charsWithPosition, wordChars);
+                                    System.Threading.Thread.Sleep(_nativeSwipePausePerLetter * word.Length);
+                                    break;
+                            }
                         }
                     }
                 }
@@ -277,7 +293,12 @@ namespace WS.Wscapes
 
                         lock (_originalScreenShotLock)
                         {
-                            var wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, true, 400, 1410, 70, 600);
+                            var wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, false, 400, 1410, 70, 600);
+
+                            if (wordPosition == null)
+                            {
+                                wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, true, 400, 1410, 70, 600);
+                            }
 
                             if (wordPosition != null)
                             {
@@ -319,7 +340,7 @@ namespace WS.Wscapes
                     lock (_originalScreenShotLock)
                     {
                         AppState.OriginalScreenshot = new Bitmap(screenshotMemStream);
-                        AppState.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot.png");
+                        //AppState.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot.png");
 
                         AppState.IsFreshScreenshot = true;
 
@@ -437,11 +458,18 @@ namespace WS.Wscapes
             {
                 var url = string.Format(WORDS_SERVICE_URL, letters);
 
-                var reponse = await httpClient.GetAsync(url);
+                try
+                {
+                    var reponse = await httpClient.GetAsync(url);
 
-                var jsonResult = await reponse.Content.ReadAsStringAsync();
+                    var jsonResult = await reponse.Content.ReadAsStringAsync();
 
-                return JsonConvert.DeserializeObject<IEnumerable<IEnumerable<string>>>(jsonResult);
+                    return JsonConvert.DeserializeObject<IEnumerable<IEnumerable<string>>>(jsonResult);
+                }
+                catch
+                {
+                    return null;
+                }
             }
         }
 
@@ -463,6 +491,8 @@ namespace WS.Wscapes
             driverOptions.AddAdditionalCapability("appPackage", "com.peoplefun.wordcross");
             driverOptions.AddAdditionalCapability("appActivity", "com.peoplefun.wordcross.MonkeyGame");
             driverOptions.AddAdditionalCapability("noReset", "true");
+            driverOptions.AddAdditionalCapability("disableWindowAnimation", "true");
+
 
             _driver = new AndroidDriver<AndroidElement>(new Uri("http://localhost:4723/wd/hub"), driverOptions);
 
