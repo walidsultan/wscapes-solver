@@ -62,6 +62,8 @@ namespace WS.Wscapes
         private int _nativeSwipePausePerLetter = 1;
 
         private int _equalCharactersSequenceCount = 0;
+
+        private Dimensions _dimensions;
         public WordscapesSolver()
         {
             InitializeComponent();
@@ -154,8 +156,8 @@ namespace WS.Wscapes
             //Change characters order
             AppState.ClickPosition = new System.Drawing.Point()
             {
-                X = 170,
-                Y = 1546
+                X = _dimensions.ReOrderLevelX,
+                Y = _dimensions.ReOrderLevelY
             };
 
             SetGameState(GameState.ReOrderLevel);
@@ -237,7 +239,7 @@ namespace WS.Wscapes
             var firstCharPosition = charWithPosition.Position;
             charWithPosition.IsSelected = true;
             string wordScript = START_TOUCH_SCRIPT;
-            wordScript += string.Format(POSITION_SCRIPT, firstCharPosition.X, firstCharPosition.Y);
+            wordScript += string.Format(POSITION_SCRIPT, firstCharPosition.X * _dimensions.NativeCooridinatesXFactor, firstCharPosition.Y * _dimensions.NativeCooridinatesYFactor);
 
             for (int charIndex = 1; charIndex < wordChars.Length; charIndex++)
             {
@@ -246,7 +248,7 @@ namespace WS.Wscapes
 
                 charWithPosition.IsSelected = true;
 
-                wordScript += string.Format(POSITION_SCRIPT, charWithPosition.Position.X, charWithPosition.Position.Y);
+                wordScript += string.Format(POSITION_SCRIPT, charWithPosition.Position.X * _dimensions.NativeCooridinatesXFactor, charWithPosition.Position.Y * _dimensions.NativeCooridinatesYFactor);
             }
             wordScript += END_TOUCH_SCRIPT;
 
@@ -293,11 +295,12 @@ namespace WS.Wscapes
 
                         lock (_originalScreenShotLock)
                         {
-                            var wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, false, 400, 1410, 70, 600);
+
+                            var wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, false, _dimensions.OcrInitWordLeft, _dimensions.OcrInitWordTop, _dimensions.OcrInitWordHeight, _dimensions.OcrInitWordWidth);
 
                             if (wordPosition == null)
                             {
-                                wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, true, 400, 1410, 70, 600);
+                                wordPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, AppState.OriginalScreenshot, true, _dimensions.OcrInitWordLeft, _dimensions.OcrInitWordTop, _dimensions.OcrInitWordHeight, _dimensions.OcrInitWordWidth);
                             }
 
                             if (wordPosition != null)
@@ -340,10 +343,15 @@ namespace WS.Wscapes
                     lock (_originalScreenShotLock)
                     {
                         AppState.OriginalScreenshot = new Bitmap(screenshotMemStream);
-                        //AppState.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot.png");
+                        AppState.OriginalScreenshot.Save($"App_Data\\current_screen_original_screenshot.png");
 
                         AppState.IsFreshScreenshot = true;
 
+
+                        if (_dimensions == null)
+                        {
+                            _dimensions = new Dimensions(AppState.OriginalScreenshot.Width, AppState.OriginalScreenshot.Height);
+                        }
                         // log.Info("phone screenshot - saved");
                     }
                 }
@@ -378,7 +386,7 @@ namespace WS.Wscapes
                     if (AppState.CurrentGameState != GameState.Puzzle)
                     {
 
-                        var levelControls = _ocr.GetCharacterControls(image);
+                        var levelControls = _ocr.GetCharacterControls(image, _dimensions);
                         if (levelControls != null && levelControls.Characters.Count() > 0)
                         {
                             if (!levelControls.ChangeOrder)
@@ -413,11 +421,11 @@ namespace WS.Wscapes
 
         private bool CheckForPiggyBank(Bitmap image)
         {
-            var piggyPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string> { "PIGGY" }, image, true, 370, 600, 80, 380);
+            var piggyPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string> { "PIGGY" }, image, true, _dimensions.PiggyBankLeft, _dimensions.PiggyBankTop, _dimensions.PiggyBankHeight, _dimensions.PiggyBankWidth);
             if (piggyPosition != null)
             {
-                var crossLocationOffsetY = 50;
-                var crossLocationOffsetX = 750;
+                var crossLocationOffsetY = _dimensions.PiggyBankCrossOffsetY;
+                var crossLocationOffsetX = _dimensions.PiggyBankCrossOffsetX;
 
                 AppState.ClickPosition = new System.Drawing.Point()
                 {
@@ -434,7 +442,7 @@ namespace WS.Wscapes
         private bool CheckForContinueWords(Bitmap image, bool binarizeImage)
         {
             var continueWords = new List<string> { "LEVEL", "COLLECT" };
-            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, binarizeImage, OCR_MATHCING_CONTINUE_WORD_LEFT, OCR_MATHCING_CONTINUE_WORD_TOP, OCR_MATHCING_CONTINUE_WORD_HEIGHT, OCR_MATHCING_CONTINUE_WORD_WIDTH);
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, binarizeImage, _dimensions.OcrContinueWordLeft, _dimensions.OcrContinueWordTop, _dimensions.OcrContinueWordHeight, _dimensions.OcrContinueWordWidth);
             if (matchingWord != null)
             {
                 //Click on that point to start the level

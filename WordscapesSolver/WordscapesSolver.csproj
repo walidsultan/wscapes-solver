@@ -84,10 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppState.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="DataTypes\Character.cs" />
     <Compile Include="DataTypes\BitmapWithYOffset.cs" />
     <Compile Include="DataTypes\GameState.cs" />
     <Compile Include="DataTypes\LevelControls.cs" />
+    <Compile Include="Dimensions.cs" />
     <Compile Include="OCR.cs" />
     <Compile Include="WordscapesSolver.cs">
       <SubType>Form</SubType>

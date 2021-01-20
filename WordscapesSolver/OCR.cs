@@ -21,41 +21,30 @@ namespace WS.Wscapes
         }
 
 
-        public LevelControls GetCharacterControls(Bitmap screenshot_segmented)
+        public LevelControls GetCharacterControls(Bitmap screenshot_segmented, Dimensions dimensions)
         {
-            ////Emulator
-            //int controlOffsetLeft = 227;
-            //int controlOffsetTop = 1400;
-            //int controlOffsetWidth = 644;
-            //int controlOffsetHeight = 840;
 
             //Pixel XL
-            int controlOffsetLeft = 247;
-            int controlOffsetTop = 1500;
-            int controlOffsetWidth = 934;
-            int controlOffsetHeight = 1040;
+            int controlOffsetLeft = dimensions.OcrControlsLeft;
+            int controlOffsetTop = dimensions.OcrControlsTop;
+            int controlOffsetWidth = dimensions.OcrControlsWidth;
+            int controlOffsetHeight = dimensions.OcrControlsHeight;
 
             var controlsImage = CropImage(screenshot_segmented, new Rectangle(controlOffsetLeft, controlOffsetTop, controlOffsetWidth, controlOffsetHeight));
             //controlsImage.Save($"App_Data\\current_cropped_controls.png");
 
-            //var binarizedImage = Binarize(controlsImage);
-
-            //var inverted_controls = (Bitmap)binarizedImage.Clone();
-            //Invert(inverted_controls);
-
             var invertedControls = Binarize(controlsImage, false);
             //invertedControls.Save($"App_Data\\current_cropped_controls_inverted.png");
-
 
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(invertedControls);
-            //IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 13500 && (x.Rectangle.Height > 120 & x.Rectangle.Height < 160));
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > 2500 && x.Area < 23000 && (x.Rectangle.Height > 120 & x.Rectangle.Height < 180));
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > dimensions.OcrControlsMinArea && x.Area < dimensions.OcrControlsMaxArea && (x.Rectangle.Height > dimensions.OcrControlsMinHeight & x.Rectangle.Height < dimensions.OcrControlsMaxHeight));
+
             if (blobs.Count() == 0) return null;
 
             //Cut the Characters
-            var cropPadding = 50;
+            var cropPadding = dimensions.OcrControlsPadding;
             List<Bitmap> charImages = new List<Bitmap>();
             foreach (var blob in blobs)
             {
@@ -87,7 +76,7 @@ namespace WS.Wscapes
 
             //Binarize stacked image
             stackedImage = Binarize(stackedImage);
-           // stackedImage.Save($"App_Data\\stacked_cropped_controls_binarized.png");
+            //stackedImage.Save($"App_Data\\stacked_cropped_controls_binarized.png");
 
             LevelControls levelControls = new LevelControls();
             using (var ocrPage = _ocrEngine.Process(stackedImage, PageSegMode.SingleWord))
@@ -107,13 +96,13 @@ namespace WS.Wscapes
                     levelControls.Characters.Add(new Character()
                     {
                         Char = chars[blobIndex],
-                        Position = new Rectangle(blob.Rectangle.X + controlOffsetLeft + blob.Rectangle.Width / 2, blob.Rectangle.Y + controlOffsetTop + blob.Rectangle.Height / 2, blob.Rectangle.Width, blob.Rectangle.Height)
+                        Position = new Rectangle(blob.Rectangle.X + controlOffsetLeft + blob.Rectangle.Width / 4, blob.Rectangle.Y + controlOffsetTop + blob.Rectangle.Height / 4, blob.Rectangle.Width, blob.Rectangle.Height)
                     });
                     blobIndex++;
                 }
             }
 
-            AppState.IsFourWordsOnly = IsFourWordsOnly(screenshot_segmented);
+            AppState.IsFourWordsOnly = IsFourWordsOnly(screenshot_segmented, dimensions);
             return levelControls;
 
         }
@@ -138,7 +127,7 @@ namespace WS.Wscapes
                 {
 
                     if ((image.GetPixel(x, y).R >= highThreshold && image.GetPixel(x, y).G >= highThreshold && image.GetPixel(x, y).B >= highThreshold) ||
-                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0)||
+                        (image.GetPixel(x, y).R == 0 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 0) ||
                         (image.GetPixel(x, y).R == 96 && image.GetPixel(x, y).G == 0 && image.GetPixel(x, y).B == 46))
                     {
                         sharpenImage.SetPixel(x, y, invert ? Color.Black : Color.White);
@@ -154,13 +143,13 @@ namespace WS.Wscapes
         }
 
 
-        public bool IsFourWordsOnly(Bitmap image)
+        public bool IsFourWordsOnly(Bitmap image, Dimensions dimensions)
         {
-            var squareWidth = 45;
-            var squareHeight = 54;
+            var squareWidth = dimensions.IsFourWordsWidth;
+            var squareHeight = dimensions.IsFourWordsHeight;
             //image.Save($"App_Data\\IsFourWordsOnly_Before.png");
 
-            var fourWordsOnly = CropImage(image, new Rectangle(200, image.Height - 114, squareWidth, squareHeight));
+            var fourWordsOnly = CropImage(image, new Rectangle(dimensions.IsFourWordsLeft, image.Height - dimensions.IsFourWordsTop, squareWidth, squareHeight));
             fourWordsOnly = Binarize(fourWordsOnly);
 
             //fourWordsOnly.Save($"App_Data\\IsFourWordsOnly_After.png");
@@ -178,7 +167,7 @@ namespace WS.Wscapes
             if (YOffset.HasValue || xOffset.HasValue)
             {
                 image = CropImage(image, new Rectangle(xOffset ?? 0, YOffset.Value, width ?? image.Width, height ?? image.Height - YOffset.Value));
-              //  image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
+                // image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
             }
 
             //binarize image
@@ -186,7 +175,7 @@ namespace WS.Wscapes
             if (binarizeImage)
             {
                 ocrImage = Binarize(image);
-               // ocrImage.Save("App_Data\\GetFirstMatchingWordCoordinates_binarized.png");
+                // ocrImage.Save("App_Data\\GetFirstMatchingWordCoordinates_binarized.png");
             }
 
             using (var ocrPage = _ocrEngine.Process(ocrImage, PageSegMode.SingleLine))
@@ -207,7 +196,7 @@ namespace WS.Wscapes
                                 iter.TryGetBoundingBox(PageIteratorLevel.Word, out Rect wordPosition);
                                 if (YOffset.HasValue)
                                 {
-                                    wordPosition = new Rect(wordPosition.X1+xOffset.Value, wordPosition.Y1 + YOffset.Value, wordPosition.Width, wordPosition.Height);
+                                    wordPosition = new Rect(wordPosition.X1 + xOffset.Value, wordPosition.Y1 + YOffset.Value, wordPosition.Width, wordPosition.Height);
                                 }
                                 return new KeyValuePair<string, Rect>(matchingWord, wordPosition);
                             }
@@ -274,6 +263,18 @@ namespace WS.Wscapes
         private static Bitmap CropImage(Bitmap img, Rectangle cropArea)
         {
             Bitmap croppedImage = new Bitmap(img);
+
+            if (cropArea.X + cropArea.Width > img.Width)
+            {
+                cropArea.Width = img.Width - cropArea.X;
+            }
+
+            if (cropArea.X < 0)
+            {
+                cropArea.Width += cropArea.X;
+                cropArea.X = 0;
+            }
+
             Crop filter = new Crop(cropArea);
             // apply the filter
             return filter.Apply(croppedImage);
