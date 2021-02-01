@@ -11,7 +11,6 @@ namespace WS.Wscapes
     public class AppState
     {
         public static Bitmap OriginalScreenshot { get; set; }
-       // public static Bitmap BinarizedScreenshot { get; set; }
         public static GameState CurrentGameState { get; set; }
         public static GameState PreviousGameState { get; set; }
         public static Point ClickPosition { get; set; }

@@ -336,11 +336,204 @@ namespace WordscapesSolver.OCR.Tests
 
             //Verify
             Assert.AreEqual(7, levelControls.Characters.Count());
-            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('C'))==2 );
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('C')) == 2);
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('H')));
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+        }
+
+
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_TIMIDLY()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.TIMIDLY.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('I')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('T')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('M')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('Y')));
+        }
+
+
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_TIMIDLY2()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.TIMIDLY_2.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('I')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('T')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('M')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('Y')));
+        }
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_REWARD()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.REWARD.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(6, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('R')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('W')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_CONVICT()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.CONVICT.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('C')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('O')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('N')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('V')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('T')));
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_OCCUPY()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.OCCUPY.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(6, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('C')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('O')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('P')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('Y')));
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_INFLOW()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.INFLOW.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(6, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('N')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('F')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('O')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('W')));
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_DIGITAL()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.DIGITAL.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('I')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('G')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('T')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('A')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_MUDBIE()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.MUDBIE.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(6, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('M')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('B')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void UT_Hi_Res_Controls_Detection_CLARQUE()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\HiRes\test.case.CLARQUE.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify 
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('C')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('G')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('R')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('Q')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
             Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
         }
     }

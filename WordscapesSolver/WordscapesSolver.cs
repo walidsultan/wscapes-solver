@@ -160,6 +160,9 @@ namespace WS.Wscapes
                 Y = _dimensions.ReOrderLevelY
             };
 
+            //Save the problematic screenshot
+            AppState.OriginalScreenshot.Save($"App_Data\\OCR_Failure\\current_screenshot_{DateTime.Now.ToString("MM-dd-yyyy HHmmss tt")}.png");
+
             SetGameState(GameState.ReOrderLevel);
         }
 
@@ -462,22 +465,13 @@ namespace WS.Wscapes
 
         private async Task<IEnumerable<IEnumerable<string>>> GetWordsSolution(string letters)
         {
-            using (var httpClient = new HttpClient())
+            try
             {
-                var url = string.Format(WORDS_SERVICE_URL, letters);
-
-                try
-                {
-                    var reponse = await httpClient.GetAsync(url);
-
-                    var jsonResult = await reponse.Content.ReadAsStringAsync();
-
-                    return JsonConvert.DeserializeObject<IEnumerable<IEnumerable<string>>>(jsonResult);
-                }
-                catch
-                {
-                    return null;
-                }
+                return await WordsFinder.Get(letters);
+            }
+            catch
+            {
+                return null;
             }
         }
 

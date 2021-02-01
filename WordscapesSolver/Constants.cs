@@ -11,15 +11,15 @@ namespace WS.Wscapes
         //Main Menu
         public const double OCR_PCT_INIT_WORD_LEFT = 0.27778;
         public const double OCR_PCT_INIT_WORD_TOP = 0.55078125;
-        public const double OCR_PCT_INIT_WORD_WIDTH = 0.41667;
-        public const double OCR_PCT_INIT_WORD_HEIGHT = 0.02734375;
+        public const double OCR_PCT_INIT_WORD_WIDTH = 0.23;
+        public const double OCR_PCT_INIT_WORD_HEIGHT = 0.03;
 
         //Controls
         public const double OCR_PCT_CONTROLS_LEFT = 0.18;
         public const double OCR_PCT_CONTROLS_TOP = 0.5859375;
         public const double OCR_PCT_CONTROLS_WIDTH = 0.6486111;
         public const double OCR_PCT_CONTROLS_HEIGHT= 0.40625;
-        public const double OCR_PCT_CONTROLS_PADDING = 0.0347222;
+        public const double OCR_PCT_CONTROLS_PADDING = 0.051;
         public const double OCR_PCT_CONTROLS_MIN_AREA = 0.00062;
         public const double OCR_PCT_CONTROLS_MAX_AREA = 0.0062391493;
         public const double OCR_PCT_CONTROLS_MIN_HEIGHT = 0.046875;

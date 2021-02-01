@@ -153,6 +153,30 @@ namespace WordscapesSolver.OCR.Tests
 
             //Execute
             var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            if (matchingWord == null)
+            {
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            }
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_Level_2_Word_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.Level2.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            if (matchingWord == null)
+            {
+                 matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            }
 
             //Verify
             Assert.IsNotNull(matchingWord);
