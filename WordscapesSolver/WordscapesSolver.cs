@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -24,6 +25,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tesseract;
 using WS.Wscapes.DataTypes;
+using Wscapes.DAL.Repositories;
 
 namespace WS.Wscapes
 {
@@ -48,15 +50,8 @@ namespace WS.Wscapes
         private const string POSITION_SCRIPT = "sendevent /dev/input/event2 3 53 {0};sendevent /dev/input/event2 3 54 {1};sendevent /dev/input/event2 3 58 17;sendevent /dev/input/event2 0 0 0;";
         private const string END_TOUCH_SCRIPT = "sendevent /dev/input/event2 3 57 -1;sendevent /dev/input/event2 0 0 0;'";
 
-        private const string WORDS_SERVICE_URL = "https://wscapes-solver.azurewebsites.net/solve?letters={0}";
-
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-
-        private const int OCR_MATHCING_CONTINUE_WORD_LEFT = 440;
-        private const int OCR_MATHCING_CONTINUE_WORD_TOP = 2020;
-        private const int OCR_MATHCING_CONTINUE_WORD_WIDTH = 590;
-        private const int OCR_MATHCING_CONTINUE_WORD_HEIGHT = 70;
 
         private SwipeMethod _swipeMethod;
         private int _nativeSwipePausePerLetter = 1;
@@ -64,6 +59,9 @@ namespace WS.Wscapes
         private int _equalCharactersSequenceCount = 0;
 
         private Dimensions _dimensions;
+
+        private WordsInfoRepository _wordsInfoRepository;
+
         public WordscapesSolver()
         {
             InitializeComponent();
@@ -83,6 +81,7 @@ namespace WS.Wscapes
                     WindowState = FormWindowState.Normal;
                 };
 
+            _wordsInfoRepository = new WordsInfoRepository();
         }
 
         private void WordscapesSolver_Load(object sender, EventArgs e)
@@ -145,6 +144,8 @@ namespace WS.Wscapes
                     AppState.PreviousLevelControls = AppState.CurrentLevelControls.ToList();
                     // log.Info($"Start solve level. Controls: {new string(AppState.CurrentLevelControls.Select(x => x.Char).ToArray())}");
                     await SolveLevel(AppState.CurrentLevelControls);
+
+
                     break;
             }
             _actionTimer.Enabled = true;
@@ -161,7 +162,7 @@ namespace WS.Wscapes
             };
 
             //Save the problematic screenshot
-            AppState.OriginalScreenshot.Save($"App_Data\\OCR_Failure\\current_screenshot_{DateTime.Now.ToString("MM-dd-yyyy HHmmss tt")}.png");
+            //AppState.OriginalScreenshot.Save($"App_Data\\OCR_Failure\\current_screenshot_{DateTime.Now.ToString("MM-dd-yyyy HHmmss tt")}.png");
 
             SetGameState(GameState.ReOrderLevel);
         }
@@ -199,40 +200,61 @@ namespace WS.Wscapes
                 string allChars = string.Concat(charsWithPosition.Select(x => x.Char).ToArray());
                 IEnumerable<IEnumerable<string>> solution = await GetWordsSolution(allChars);
 
-                if (solution != null)
+                //Save words in DB
+                var dbTask = Task.Run(() =>
                 {
-                    foreach (var solutionGroup in solution)
+                    Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    var allWords = solution.SelectMany(x => x);
+                    _wordsInfoRepository.AddOrUpdateWords(allWords);
+                    stopWatch.Stop();
+                    TimeSpan ts = stopWatch.Elapsed;
+
+                    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                        ts.Hours, ts.Minutes, ts.Seconds,
+                        ts.Milliseconds / 10);
+                    log.Info($"Time to insert words: {elapsedTime}, Number of words: {allWords.Count()}");
+                });
+
+                var solveTask = Task.Run(() =>
+                {
+                    if (solution != null)
                     {
-                        foreach (var word in solutionGroup)
+                        foreach (var solutionGroup in solution)
                         {
-                            if (word.Length == 3 && AppState.IsFourWordsOnly)
+                            foreach (var word in solutionGroup)
                             {
-                                break;
-                            }
-
-                            foreach (var cwp in charsWithPosition)
-                            {
-                                cwp.IsSelected = false;
-                            }
-
-                            var wordChars = word.ToUpper().ToCharArray();
-
-                            switch (_swipeMethod)
-                            {
-                                case SwipeMethod.Appium:
-                                    WriteWordUsingAppium(charsWithPosition, wordChars);
+                                if (word.Length == 3 && AppState.IsFourWordsOnly)
+                                {
                                     break;
-                                case SwipeMethod.Native:
-                                    WriteWordUsingMobileShell(charsWithPosition, wordChars);
-                                    System.Threading.Thread.Sleep(_nativeSwipePausePerLetter * word.Length);
-                                    break;
+                                }
+
+                                foreach (var cwp in charsWithPosition)
+                                {
+                                    cwp.IsSelected = false;
+                                }
+
+                                var wordChars = word.ToUpper().ToCharArray();
+
+                                switch (_swipeMethod)
+                                {
+                                    case SwipeMethod.Appium:
+                                        WriteWordUsingAppium(charsWithPosition, wordChars);
+                                        break;
+                                    case SwipeMethod.Native:
+                                        WriteWordUsingMobileShell(charsWithPosition, wordChars);
+                                        System.Threading.Thread.Sleep(_nativeSwipePausePerLetter * word.Length);
+                                        break;
+                                }
                             }
                         }
                     }
-                }
 
-                System.Threading.Thread.Sleep(IMPLICIT_WAIT_TIME);
-                SetGameState(GameState.Transitioning);
+                    System.Threading.Thread.Sleep(IMPLICIT_WAIT_TIME);
+                    SetGameState(GameState.Transitioning);
+                });
+
+                await Task.WhenAll(dbTask, solveTask);
             }
         }
 
