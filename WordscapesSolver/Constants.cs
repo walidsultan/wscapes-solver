@@ -48,7 +48,7 @@ namespace WS.Wscapes
         public const double PCT_REORDER_TOP = 0.65790625;
 
         //Chat Button
-        public const double PCT_TEAM_BUTTON_LEFT = .5;
+        public const double PCT_TEAM_BUTTON_LEFT = 0.3148;
         public const double PCT_TEAM_BUTTON_TOP = 0.93;
 
         //Is four words
