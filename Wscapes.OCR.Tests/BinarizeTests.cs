@@ -3,6 +3,7 @@ using System.Drawing;
 using WS.Wscapes;
 using System.Linq;
 using System.IO;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WordscapesSolver.OCR.Tests
 {
@@ -48,6 +49,27 @@ namespace WordscapesSolver.OCR.Tests
 
             //Execute
             image = new Bitmap(@"TestCases\LowRes\test.case.540_960.DITEEC.png");
+            isFourWordsOnly = _sut.IsFourWordsOnly(image, dimensions);
+            //Verify
+            Assert.IsFalse(isFourWordsOnly);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_Controls_Detection_4WordOnly_2()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.4.letters.only.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var isFourWordsOnly = _sut.IsFourWordsOnly(image, dimensions);
+
+            //Verify
+            Assert.IsTrue(isFourWordsOnly);
+
+            //Execute
+            image = new Bitmap(@"TestCases\LowRes\test.case.540_960.3.letters.png");
             isFourWordsOnly = _sut.IsFourWordsOnly(image, dimensions);
             //Verify
             Assert.IsFalse(isFourWordsOnly);

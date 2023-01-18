@@ -98,6 +98,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="DataTypes\Character.cs" />
     <Compile Include="DataTypes\BitmapWithYOffset.cs" />
+    <Compile Include="DataTypes\GameMode.cs" />
     <Compile Include="DataTypes\GameState.cs" />
     <Compile Include="DataTypes\LevelControls.cs" />
     <Compile Include="Dimensions.cs" />

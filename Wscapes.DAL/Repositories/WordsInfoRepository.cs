@@ -10,7 +10,7 @@ namespace Wscapes.DAL.Repositories
     public class WordsInfoRepository
     {
 
-        public void AddOrUpdateWords(IEnumerable<string> words)
+        public int AddOrUpdateWords(IEnumerable<string> words)
         {
             using (var context = new WscapesDBContext())
             {
@@ -23,6 +23,8 @@ namespace Wscapes.DAL.Repositories
                 context.WordsInfo.AddRange(newWords);
 
                 context.SaveChanges();
+
+                return newWords.Count();
             }
         }
 

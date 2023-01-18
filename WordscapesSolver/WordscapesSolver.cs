@@ -119,6 +119,9 @@ namespace WS.Wscapes
                 case GameState.LevelSolved:
                 case GameState.PiggyBank:
                 case GameState.ReOrderLevel:
+                case GameState.ClickTeam:
+                case GameState.ClickHelp:
+                case GameState.ClickChatBack:
                     TapScreen();
                     break;
                 case GameState.Puzzle:
@@ -200,21 +203,28 @@ namespace WS.Wscapes
                 string allChars = string.Concat(charsWithPosition.Select(x => x.Char).ToArray());
                 IEnumerable<IEnumerable<string>> solution = await GetWordsSolution(allChars);
 
-                //Save words in DB
-                var dbTask = Task.Run(() =>
-                {
-                    Stopwatch stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var allWords = solution.SelectMany(x => x);
-                    _wordsInfoRepository.AddOrUpdateWords(allWords);
-                    stopWatch.Stop();
-                    TimeSpan ts = stopWatch.Elapsed;
+                ////Save words in DB
+                //var dbTask = Task.Run(() =>
+                //{
+                //    try
+                //    {
+                //        Stopwatch stopWatch = new Stopwatch();
+                //        stopWatch.Start();
+                //        var allWords = solution.SelectMany(x => x);
+                //        var newWordsCount = _wordsInfoRepository.AddOrUpdateWords(allWords);
+                //        stopWatch.Stop();
+                //        TimeSpan ts = stopWatch.Elapsed;
 
-                    string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                        ts.Hours, ts.Minutes, ts.Seconds,
-                        ts.Milliseconds / 10);
-                    log.Info($"Time to insert words: {elapsedTime}, Number of words: {allWords.Count()}");
-                });
+                //        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                //            ts.Hours, ts.Minutes, ts.Seconds,
+                //            ts.Milliseconds / 10);
+                //        log.Info($"Time to insert words: {elapsedTime}, Number of words: {allWords.Count()}, New Words: {newWordsCount}");
+                //    }
+                //    catch
+                //    {
+                //        log.Info($"Failed to insert words");
+                //    }
+                //});
 
                 var solveTask = Task.Run(() =>
                 {
@@ -254,7 +264,7 @@ namespace WS.Wscapes
                     SetGameState(GameState.Transitioning);
                 });
 
-                await Task.WhenAll(dbTask, solveTask);
+                await Task.WhenAll(solveTask);
             }
         }
 
@@ -344,6 +354,51 @@ namespace WS.Wscapes
                     case GameState.Transitioning:
                     case GameState.Puzzle:
                         SetGameState(AppState.OriginalScreenshot);
+
+                        if (AppState.GameMode == GameMode.Help)
+                            switch (AppState.CurrentGameState)
+                            {
+                                case GameState.LevelSolved:
+                                case GameState.Menu:
+                                    AppState.ClickPosition = new System.Drawing.Point()
+                                    {
+                                        X = _dimensions.TeamButtonX,
+                                        Y = _dimensions.TeamButtonY
+                                    };
+
+                                    SetGameState(GameState.ClickTeam);
+
+                                    break;
+                            }
+                        break;
+                    case GameState.Chat:
+
+                        if (AppState.GameMode == GameMode.Help)
+                        {
+                            var helpButtonPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string>() { "HELP" }, AppState.OriginalScreenshot, true, _dimensions.HelpColumnLeft, _dimensions.HelpColumnTop, _dimensions.HelpColumnHeight, _dimensions.HelpColumnWidth, PageSegMode.SparseText);
+
+                            if (helpButtonPosition != null)
+                            {
+                                var position = helpButtonPosition.Value.Value;
+                                AppState.ClickPosition = new System.Drawing.Point()
+                                {
+                                    X = position.X1 + position.Width / 2,
+                                    Y = position.Y1 + position.Height / 2
+                                };
+
+                                SetGameState(GameState.ClickHelp);
+                            }
+                        }
+                        else if (AppState.GameMode == GameMode.Puzzle)
+                        {
+                            AppState.ClickPosition = new System.Drawing.Point()
+                            {
+                                X = _dimensions.ChatBackX,
+                                Y = _dimensions.ChatBackY
+                            };
+
+                            SetGameState(GameState.ClickChatBack);
+                        }
                         break;
                 }
                 AppState.IsFreshScreenshot = AppState.CurrentGameState == AppState.PreviousGameState;
@@ -401,12 +456,25 @@ namespace WS.Wscapes
                         return;
                     }
 
-
-                    var foundPiggyBank = CheckForPiggyBank(image);
-                    if (foundPiggyBank)
+                    //Check for skip animation
+                    var foundSkip = CheckForSkipAnimation(image, false);
+                    if (foundSkip)
                     {
                         return;
                     }
+
+                    //Check for collect stars
+                    var foundCollectStarsWord = CheckForCollectStars(image, false);
+                    if (foundCollectStarsWord)
+                    {
+                        return;
+                    }
+
+                    //var foundPiggyBank = CheckForPiggyBank(image);
+                    //if (foundPiggyBank)
+                    //{
+                    //    return;
+                    //}
 
                     if (AppState.CurrentGameState != GameState.Puzzle)
                     {
@@ -436,12 +504,27 @@ namespace WS.Wscapes
                     {
                         return;
                     }
+
+                    if (AppState.GameMode == GameMode.Help)
+                    {
+                        if (CheckForChatWord(image))
+                        {
+                            SetGameState(GameState.Chat);
+                        }
+                    }
                 }
                 finally
                 {
                     //  log.Info($"End - Game State: {AppState.CurrentGameState}");
                 }
             }
+        }
+
+        private bool CheckForChatWord(Bitmap image)
+        {
+            var chatPosition = _ocr.GetFirstMatchingWordCoordinates(new List<string> { "CHAT" }, image, false, _dimensions.ChatButtonLeft, _dimensions.ChatButtonTop, _dimensions.ChatButtonHeight, _dimensions.ChatButtonWidth);
+
+            return chatPosition != null;
         }
 
         private bool CheckForPiggyBank(Bitmap image)
@@ -485,6 +568,48 @@ namespace WS.Wscapes
             return false;
         }
 
+        private bool CheckForCollectStars(Bitmap image, bool binarizeImage)
+        {
+            var continueWords = new List<string> {"COLLECT" };
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, binarizeImage, _dimensions.OcrCollectStarsLeft, _dimensions.OcrCollectStarsTop, _dimensions.OcrCollectStarsHeight, _dimensions.OcrCollectStarsWidth);
+            if (matchingWord != null)
+            {
+                //Click on that point to start the level
+                AppState.ClickPosition = new System.Drawing.Point()
+                {
+                    X = matchingWord.Value.Value.X1 + matchingWord.Value.Value.Width / 2,
+                    Y = matchingWord.Value.Value.Y1 + matchingWord.Value.Value.Height / 2
+                };
+
+                SetGameState(GameState.LevelSolved);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool CheckForSkipAnimation(Bitmap image, bool binarizeImage)
+        {
+            var continueWords = new List<string> { "SKIP" };
+            var matchingWord = _ocr.GetFirstMatchingWordCoordinates(continueWords, image, binarizeImage, _dimensions.OcrSkipAnimationLeft, _dimensions.OcrSkipAnimationTop, _dimensions.OcrSkipAnimationHeight, _dimensions.OcrSkipAnimationWidth);
+            if (matchingWord != null)
+            {
+                //Click on that point to start the level
+                AppState.ClickPosition = new System.Drawing.Point()
+                {
+                    X = matchingWord.Value.Value.X1 + matchingWord.Value.Value.Width / 2,
+                    Y = matchingWord.Value.Value.Y1 + matchingWord.Value.Value.Height / 2
+                };
+
+                SetGameState(GameState.LevelSolved);
+
+                return true;
+            }
+
+            return false;
+        }
+
         private async Task<IEnumerable<IEnumerable<string>>> GetWordsSolution(string letters)
         {
             try
@@ -509,8 +634,10 @@ namespace WS.Wscapes
             var driverOptions = new AppiumOptions();
 
             driverOptions.AddAdditionalCapability(MobileCapabilityType.PlatformName, "Android");
-            driverOptions.AddAdditionalCapability(MobileCapabilityType.DeviceName, txtDeviceId.Text);
+            //driverOptions.AddAdditionalCapability(MobileCapabilityType.DeviceName, txtDeviceId.Text);
             // driverOptions.AddAdditionalCapability(MobileCapabilityType.DeviceName, "emulator-5554");
+
+             driverOptions.AddAdditionalCapability("deviceId", "192.168.0.13:5555");
 
             driverOptions.AddAdditionalCapability("appPackage", "com.peoplefun.wordcross");
             driverOptions.AddAdditionalCapability("appActivity", "com.peoplefun.wordcross.MonkeyGame");
@@ -602,6 +729,16 @@ namespace WS.Wscapes
         {
             if (WindowState == FormWindowState.Minimized)
                 Hide();
+        }
+
+        private void rbModeHelp_CheckedChanged(object sender, EventArgs e)
+        {
+            AppState.GameMode = GameMode.Help;
+        }
+
+        private void rbModePuzzle_CheckedChanged(object sender, EventArgs e)
+        {
+            AppState.GameMode = GameMode.Puzzle;
         }
     }
 }

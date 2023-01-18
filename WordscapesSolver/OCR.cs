@@ -39,7 +39,7 @@ namespace WS.Wscapes
             // process image with blob counter
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(invertedControls);
-            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > dimensions.OcrControlsMinArea && x.Area < dimensions.OcrControlsMaxArea && (x.Rectangle.Height > dimensions.OcrControlsMinHeight & x.Rectangle.Height < dimensions.OcrControlsMaxHeight));
+            IEnumerable<Blob> blobs = blobCounter.GetObjectsInformation().Where(x => x.Area > dimensions.OcrControlsMinArea && x.Area < dimensions.OcrControlsMaxArea && (x.Rectangle.Height >= dimensions.OcrControlsMinHeight & x.Rectangle.Height < dimensions.OcrControlsMaxHeight));
 
             if (blobs.Count() == 0) return null;
 
@@ -96,7 +96,7 @@ namespace WS.Wscapes
                     levelControls.Characters.Add(new Character()
                     {
                         Char = chars[blobIndex],
-                        Position = new Rectangle(blob.Rectangle.X + controlOffsetLeft + blob.Rectangle.Width / 4, blob.Rectangle.Y + controlOffsetTop + blob.Rectangle.Height / 4, blob.Rectangle.Width, blob.Rectangle.Height)
+                        Position = new Rectangle(blob.Rectangle.X + controlOffsetLeft + blob.Rectangle.Width / 4, blob.Rectangle.Y + controlOffsetTop + blob.Rectangle.Height / 8, blob.Rectangle.Width, blob.Rectangle.Height)
                     });
                     blobIndex++;
                 }
@@ -147,12 +147,15 @@ namespace WS.Wscapes
         {
             var squareWidth = dimensions.IsFourWordsWidth;
             var squareHeight = dimensions.IsFourWordsHeight;
-            //image.Save($"App_Data\\IsFourWordsOnly_Before.png");
+            image.Save($"App_Data\\IsFourWordsOnly_Before.png");
+
+            var temp = Binarize(image);
+            temp.Save($"App_Data\\IsFourWordsOnly_Before_2.png");
 
             var fourWordsOnly = CropImage(image, new Rectangle(dimensions.IsFourWordsLeft, image.Height - dimensions.IsFourWordsTop, squareWidth, squareHeight));
             fourWordsOnly = Binarize(fourWordsOnly);
 
-            //fourWordsOnly.Save($"App_Data\\IsFourWordsOnly_After.png");
+            fourWordsOnly.Save($"App_Data\\IsFourWordsOnly_After.png");
 
             BlobCounter blobCounter = new BlobCounter();
             blobCounter.ProcessImage(fourWordsOnly);
@@ -162,12 +165,12 @@ namespace WS.Wscapes
         }
 
 
-        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, bool binarizeImage, int? xOffset = null, int? YOffset = null, int? height = null, int? width = null)
+        public KeyValuePair<string, Rect>? GetFirstMatchingWordCoordinates(List<string> words, Bitmap image, bool binarizeImage, int? xOffset = null, int? YOffset = null, int? height = null, int? width = null, PageSegMode segmentationMode = PageSegMode.SingleLine)
         {
             if (YOffset.HasValue || xOffset.HasValue)
             {
                 image = CropImage(image, new Rectangle(xOffset ?? 0, YOffset.Value, width ?? image.Width, height ?? image.Height - YOffset.Value));
-                 image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
+                image.Save("App_Data\\GetFirstMatchingWordCoordinates.png");
             }
 
             //binarize image
@@ -175,10 +178,10 @@ namespace WS.Wscapes
             if (binarizeImage)
             {
                 ocrImage = Binarize(image);
-                // ocrImage.Save("App_Data\\GetFirstMatchingWordCoordinates_binarized.png");
+                ocrImage.Save("App_Data\\GetFirstMatchingWordCoordinates_binarized.png");
             }
 
-            using (var ocrPage = _ocrEngine.Process(ocrImage, PageSegMode.SingleLine))
+            using (var ocrPage = _ocrEngine.Process(ocrImage, segmentationMode))
             {
                 using (var iter = ocrPage.GetIterator())
                 {

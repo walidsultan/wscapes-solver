@@ -515,6 +515,48 @@ namespace WordscapesSolver.OCR.Tests
         }
 
         [TestMethod]
+        public void UT_Low_Res_Controls_Detection_MUFFLED()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.MUFFLED.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('M')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('U')));
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('F')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('L')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('D')));
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_Controls_Detection_EXTINCT()
+        {
+            //Setup
+            Bitmap image = new Bitmap(Directory.GetCurrentDirectory() + @"\TestCases\LowRes\test.case.540_960.EXTINCT.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var levelControls = _sut.GetCharacterControls(image, dimensions);
+
+            //Verify
+            Assert.AreEqual(7, levelControls.Characters.Count());
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('E')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('X')));
+            Assert.IsNotNull(levelControls.Characters.Count(x => x.Char.Equals('T')) == 2);
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('I')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('N')));
+            Assert.IsNotNull(levelControls.Characters.Single(x => x.Char.Equals('C')));
+        }
+
+        [TestMethod]
         [Ignore]
         public void UT_Hi_Res_Controls_Detection_CLARQUE()
         {

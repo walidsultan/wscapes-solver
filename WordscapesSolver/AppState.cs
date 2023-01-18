@@ -18,6 +18,8 @@ namespace WS.Wscapes
         public static IEnumerable<Character> PreviousLevelControls { get; set; }
         public static bool IsFourWordsOnly { get; set; }
         public static bool IsFreshScreenshot { get; set; } = false;
+
+        public static GameMode GameMode { get; set; }
     }
 
 

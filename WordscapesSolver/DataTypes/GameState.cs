@@ -14,6 +14,10 @@ namespace WS.Wscapes.DataTypes
         LevelSolved,
         PiggyBank,
         ReOrderLevel,
-        Transitioning
+        Transitioning,
+        ClickTeam,
+        Chat,
+        ClickHelp,
+        ClickChatBack
     }
 }

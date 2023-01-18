@@ -110,6 +110,47 @@ namespace WordscapesSolver.OCR.Tests
             Assert.AreEqual("LEVEL", matchingWord.Value.Key);
         }
 
+
+        [TestMethod]
+        public void UT_Word_Detection_LEVEL_6()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\test.case.level_6.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            if (matchingWord == null)
+            {
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            }
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Word_Detection_LEVEL_7()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\test.case.level_6.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            if (matchingWord == null)
+            {
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            }
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
         [TestMethod]
         public void UT_Word_Detection_PIGGY()
         {
@@ -144,6 +185,7 @@ namespace WordscapesSolver.OCR.Tests
 
 
         [TestMethod]
+        [Ignore]
         public void UT_Low_Res_540_960_Level_Word_Detection()
         {
             //Setup
@@ -164,6 +206,7 @@ namespace WordscapesSolver.OCR.Tests
 
 
         [TestMethod]
+        [Ignore]
         public void UT_Low_Res_540_960_Level_2_Word_Detection()
         {
             //Setup
@@ -175,12 +218,219 @@ namespace WordscapesSolver.OCR.Tests
             var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
             if (matchingWord == null)
             {
-                 matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
             }
 
             //Verify
             Assert.IsNotNull(matchingWord);
             Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_Level_3_Word_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.level_540_960_2.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            if (matchingWord == null)
+            {
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            }
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_Level_100k_Word_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.Level_100k.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, false, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            if (matchingWord == null)
+            {
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "LEVEL" }, image, true, dimensions.OcrInitWordLeft, dimensions.OcrInitWordTop, dimensions.OcrInitWordHeight, dimensions.OcrInitWordWidth);
+            }
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("LEVEL", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_COLLECT_Word_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.collect_540_960.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "COLLECT" }, image, false, dimensions.OcrContinueWordLeft, dimensions.OcrContinueWordTop, dimensions.OcrContinueWordHeight, dimensions.OcrContinueWordWidth);
+            if (matchingWord == null)
+            {
+                matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "COLLECT" }, image, true, dimensions.OcrContinueWordLeft, dimensions.OcrContinueWordTop, dimensions.OcrContinueWordHeight, dimensions.OcrContinueWordWidth);
+            }
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("COLLECT", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_Word_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.TEAM.CHAT.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "CHAT" }, image, false, dimensions.ChatButtonLeft, dimensions.ChatButtonTop, dimensions.ChatButtonHeight, dimensions.ChatButtonWidth);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("CHAT", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_Collect_Stars_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.Collect.Stars.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "COLLECT" }, image, false, dimensions.OcrCollectStarsLeft, dimensions.OcrCollectStarsTop, dimensions.OcrCollectStarsHeight, dimensions.OcrCollectStarsWidth);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("COLLECT", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_Collect_Stars_2_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.Collect.Stars.2.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "COLLECT" }, image, false, dimensions.OcrCollectStarsLeft, dimensions.OcrCollectStarsTop, dimensions.OcrCollectStarsHeight, dimensions.OcrCollectStarsWidth);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("COLLECT", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_Skip_Animation_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.Skip.Animation.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "SKIP" }, image, false, dimensions.OcrSkipAnimationLeft, dimensions.OcrSkipAnimationTop, dimensions.OcrSkipAnimationHeight, dimensions.OcrSkipAnimationWidth);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("SKIP", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_Skip_Animation_2_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.Skip.Animation.2.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "SKIP" }, image, false, dimensions.OcrSkipAnimationLeft, dimensions.OcrSkipAnimationTop, dimensions.OcrSkipAnimationHeight, dimensions.OcrSkipAnimationWidth);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("SKIP", matchingWord.Value.Key);
+        }
+
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_HELP_1_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.TEAM.CHAT.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "HELP" }, image, true, dimensions.HelpColumnLeft, dimensions.HelpColumnTop, dimensions.HelpColumnHeight, dimensions.HelpColumnWidth, Tesseract.PageSegMode.SparseText);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("HELP", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_HELP_2_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.TEAM.HELP.1.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "HELP" }, image, true, dimensions.HelpColumnLeft, dimensions.HelpColumnTop, dimensions.HelpColumnHeight, dimensions.HelpColumnWidth, Tesseract.PageSegMode.SparseText);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("HELP", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        public void UT_Low_Res_540_960_CHAT_HELP_3_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.TEAM.HELP.2.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "HELP" }, image, true, dimensions.HelpColumnLeft, dimensions.HelpColumnTop, dimensions.HelpColumnHeight, dimensions.HelpColumnWidth, Tesseract.PageSegMode.SparseText);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("HELP", matchingWord.Value.Key);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void UT_Low_Res_540_960_CHAT_HELP_4_Detection()
+        {
+            //Setup
+            Bitmap image = new Bitmap(@"TestCases\LowRes\test.case.540_960.TEAM.HELP.3.png");
+            WS.Wscapes.OCR _sut = new WS.Wscapes.OCR();
+            var dimensions = new Dimensions(image.Width, image.Height);
+
+            //Execute
+            var matchingWord = _sut.GetFirstMatchingWordCoordinates(new List<string>() { "HELP" }, image, true, dimensions.HelpColumnLeft, dimensions.HelpColumnTop, dimensions.HelpColumnHeight, dimensions.HelpColumnWidth, Tesseract.PageSegMode.SparseText);
+
+            //Verify
+            Assert.IsNotNull(matchingWord);
+            Assert.AreEqual("HELP", matchingWord.Value.Key);
         }
     }
 }

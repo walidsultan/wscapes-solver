@@ -29,11 +29,14 @@
             this.cbSwipeMethod = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.txtNativeSwipePause = new System.Windows.Forms.TextBox();
+            this.rbModePuzzle = new System.Windows.Forms.RadioButton();
+            this.rbModeHelp = new System.Windows.Forms.RadioButton();
+            this.lblMode = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(219, 183);
+            this.btnStart.Location = new System.Drawing.Point(218, 223);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(82, 29);
             this.btnStart.TabIndex = 0;
@@ -114,7 +117,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(138, 158);
+            this.label2.Location = new System.Drawing.Point(144, 158);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(72, 13);
             this.label2.TabIndex = 9;
@@ -129,11 +132,47 @@
             this.txtNativeSwipePause.TextChanged += new System.EventHandler(this.txtNativeSwipePause_TextChanged);
             this.txtNativeSwipePause.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtNativeSwipePause_KeyPress);
             // 
+            // rbModePuzzle
+            // 
+            this.rbModePuzzle.AutoSize = true;
+            this.rbModePuzzle.Checked = true;
+            this.rbModePuzzle.Location = new System.Drawing.Point(244, 190);
+            this.rbModePuzzle.Name = "rbModePuzzle";
+            this.rbModePuzzle.Size = new System.Drawing.Size(56, 17);
+            this.rbModePuzzle.TabIndex = 11;
+            this.rbModePuzzle.TabStop = true;
+            this.rbModePuzzle.Text = "Puzzle";
+            this.rbModePuzzle.UseVisualStyleBackColor = true;
+            this.rbModePuzzle.CheckedChanged += new System.EventHandler(this.rbModePuzzle_CheckedChanged);
+            // 
+            // rbModeHelp
+            // 
+            this.rbModeHelp.AutoSize = true;
+            this.rbModeHelp.Location = new System.Drawing.Point(306, 190);
+            this.rbModeHelp.Name = "rbModeHelp";
+            this.rbModeHelp.Size = new System.Drawing.Size(47, 17);
+            this.rbModeHelp.TabIndex = 12;
+            this.rbModeHelp.Text = "Help";
+            this.rbModeHelp.UseVisualStyleBackColor = true;
+            this.rbModeHelp.CheckedChanged += new System.EventHandler(this.rbModeHelp_CheckedChanged);
+            // 
+            // lblMode
+            // 
+            this.lblMode.AutoSize = true;
+            this.lblMode.Location = new System.Drawing.Point(173, 192);
+            this.lblMode.Name = "lblMode";
+            this.lblMode.Size = new System.Drawing.Size(37, 13);
+            this.lblMode.TabIndex = 13;
+            this.lblMode.Text = "Mode:";
+            // 
             // WordscapesSolver
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(497, 224);
+            this.ClientSize = new System.Drawing.Size(497, 273);
+            this.Controls.Add(this.lblMode);
+            this.Controls.Add(this.rbModeHelp);
+            this.Controls.Add(this.rbModePuzzle);
             this.Controls.Add(this.txtNativeSwipePause);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.cbSwipeMethod);
@@ -169,6 +208,9 @@
         private System.Windows.Forms.ComboBox cbSwipeMethod;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtNativeSwipePause;
+        private System.Windows.Forms.RadioButton rbModePuzzle;
+        private System.Windows.Forms.RadioButton rbModeHelp;
+        private System.Windows.Forms.Label lblMode;
     }
 }
 
